@@ -1,0 +1,67 @@
+/* Explorador de arquivos: árvore de pastas e arquivos e o destaque da nota aberta. */
+.explorador {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--color-card);
+  border-right: 1px solid var(--color-border);
+}
+
+.cabecalho-painel {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.arvore {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 6px 16px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 28px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-right: 8px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-foreground);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+button.item {
+  cursor: pointer;
+}
+
+button.item:hover {
+  background: var(--color-muted);
+}
+
+.item .nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arquivo {
+  color: var(--color-muted-foreground);
+}
+
+.pasta-titulo svg:first-child {
+  color: var(--color-muted-foreground);
+}
+
+/* Nota selecionada no explorador */
+.nota-item[aria-current="true"] {
+  color: var(--color-foreground);
+  background: var(--color-muted);
+  box-shadow: inset 2px 0 0 var(--color-primary);
+}
+

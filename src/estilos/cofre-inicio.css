@@ -1,0 +1,79 @@
+/* Tela inicial do cofre (criar ou abrir), caixa de confirmação e formulários de cofre e de pasta. */
+
+.tela-inicial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  height: 100%;
+  overflow: auto;
+  padding: 48px var(--space-lg);
+}
+
+.tela-inicial .boas-vindas {
+  max-width: 520px;
+}
+
+.colunas-inicio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 820px;
+}
+
+.cartao-inicio,
+.caixa-confirmacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: 18px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.caixa-confirmacao {
+  width: 100%;
+  max-width: 820px;
+  border-color: rgba(251, 146, 60, 0.5);
+}
+
+.titulo-caixa {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.form-criar-cofre,
+.form-nova-pasta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.form-nova-pasta {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-nova-pasta .campo {
+  flex: 1;
+  min-width: 220px;
+}
+
+.linha-local {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.caminho-local {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--color-foreground);
+}

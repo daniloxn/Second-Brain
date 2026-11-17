@@ -1,0 +1,81 @@
+/* Lista de notas e formulário de nova nota. */
+/* ---------- Notas: lista ---------- */
+
+.lista-notas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 760px;
+}
+
+.linha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.form-nova-nota {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.linha-acoes {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.itens-notas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item-nota {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--color-foreground);
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--dur-rapido), border-color var(--dur-rapido);
+}
+
+.item-nota:hover {
+  background: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.item-nota .nome {
+  font-weight: 500;
+}
+
+.item-nota .caminho {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45%;
+}
+
+.item-nota svg {
+  color: var(--color-muted-foreground);
+  flex-shrink: 0;
+}
+

@@ -1,0 +1,112 @@
+//! Comandos Tauri do agente. Cada comando junta as peças: foto do cofre antes e depois,
+//! prompt, provedor, histórico e desfazer. A lógica de cada peça fica no próprio módulo.
+
+use super::aquecimento::{iniciar_aquecimento, AquecimentoDoAgente, EstadoDoAquecimento};
+use super::contrato::{EstadoDoProvedor, RegistroDoAgente};
+use super::desfazer::desfazer_registro;
+use super::diferencas::comparar_fotos;
+use super::executar::{comando_esta_instalado, executar_provedor};
+use super::foto::tirar_foto;
+use super::historico::{anexar_registro, ler_registros, montar_registro, regravar_registro};
+use super::prompt::{montar_prompt, validar_pedido};
+use super::provedor::provedor_ativo;
+use crate::cofre::caminhos::{raiz_do_cofre_ativo, texto_para_frontend};
+use std::fs;
+use std::path::Path;
+
+/// Tamanho máximo das regras do cofre levadas ao prompt. Evita um AGENTS.md enorme estourar o pedido.
+const LIMITE_DAS_REGRAS_EM_CARACTERES: usize = 8000;
+
+/// Provedor de agente e se o programa dele está instalado (no PATH).
+#[tauri::command]
+pub fn estado_do_agente() -> EstadoDoProvedor {
+    let provedor = provedor_ativo();
+    EstadoDoProvedor {
+        nome: provedor.nome().to_string(),
+        comando: provedor.comando().to_string(),
+        instalado: comando_esta_instalado(provedor.comando()),
+    }
+}
+
+/// Situação do aquecimento: se o agente já respondeu à saudação feita ao abrir o app.
+#[tauri::command]
+pub fn estado_do_aquecimento(estado: tauri::State<'_, EstadoDoAquecimento>) -> AquecimentoDoAgente {
+    estado.atual()
+}
+
+/// Refaz o aquecimento, por exemplo depois de uma falha. Não faz nada se já estiver rodando.
+#[tauri::command]
+pub fn aquecer_agente(app: tauri::AppHandle) {
+    iniciar_aquecimento(&app);
+}
+
+/// Envia um pedido ao agente. Roda em outra thread, porque uma rodada pode levar minutos.
+/// Devolve o registro do pedido, ou o erro do agente (as mudanças feitas ficam no histórico mesmo assim).
+#[tauri::command]
+pub async fn enviar_pedido_ao_agente(app: tauri::AppHandle, pedido: String) -> Result<RegistroDoAgente, String> {
+    let pedido_validado = validar_pedido(&pedido)?;
+    let resultado = tauri::async_runtime::spawn_blocking(move || executar_pedido(&app, &pedido_validado)).await;
+    resultado.map_err(|erro| erro.to_string())?
+}
+
+/// Histórico de pedidos e mudanças, do mais recente para o mais antigo.
+#[tauri::command]
+pub fn listar_historico_do_agente(app: tauri::AppHandle) -> Result<Vec<RegistroDoAgente>, String> {
+    let raiz = raiz_do_cofre_ativo(&app)?;
+    ler_registros(&raiz)
+}
+
+/// Desfaz um pedido do histórico e o marca como desfeito. Devolve o registro atualizado.
+#[tauri::command]
+pub fn desfazer_acao_do_agente(app: tauri::AppHandle, id: String) -> Result<RegistroDoAgente, String> {
+    let raiz = raiz_do_cofre_ativo(&app)?;
+    let mut registro = ler_registros(&raiz)?
+        .into_iter()
+        .find(|registro_lido| registro_lido.id == id)
+        .ok_or("ação não encontrada no histórico")?;
+    if registro.desfeito {
+        return Err("esta ação já foi desfeita".into());
+    }
+    if registro.mudancas.is_empty() {
+        return Err("este pedido não mudou nada no cofre".into());
+    }
+    desfazer_registro(&raiz, &registro)?;
+    registro.desfeito = true;
+    regravar_registro(&raiz, &registro)?;
+    Ok(registro)
+}
+
+/// Pedido de ponta a ponta: foto de antes, rodada do agente, foto de depois, registro no log.
+/// O registro é gravado mesmo quando o agente falha, para o que ele mudou não se perder.
+fn executar_pedido(app: &tauri::AppHandle, pedido: &str) -> Result<RegistroDoAgente, String> {
+    let raiz = raiz_do_cofre_ativo(app)?;
+    let pasta_do_cofre = texto_para_frontend(&raiz);
+    let foto_de_antes = tirar_foto(&raiz)?;
+
+    let provedor = provedor_ativo();
+    let prompt = montar_prompt(pedido, ler_regras_do_cofre(&raiz).as_deref(), &agora_local(), &pasta_do_cofre);
+    let resultado = executar_provedor(provedor.as_ref(), &prompt, &pasta_do_cofre);
+
+    let foto_de_depois = tirar_foto(&raiz)?;
+    let mudancas = comparar_fotos(&foto_de_antes, &foto_de_depois);
+    let registro = montar_registro(id_novo(), agora_local(), pedido, provedor.nome(), &resultado, mudancas);
+    anexar_registro(&raiz, &registro)?;
+
+    resultado.map(|_| registro)
+}
+
+/// Regras escritas pelo usuário em `_sistema/AGENTS.md`, cortadas no limite. None se não houver arquivo.
+fn ler_regras_do_cofre(raiz_do_cofre: &Path) -> Option<String> {
+    let texto = fs::read_to_string(raiz_do_cofre.join("_sistema").join("AGENTS.md")).ok()?;
+    Some(texto.chars().take(LIMITE_DAS_REGRAS_EM_CARACTERES).collect())
+}
+
+/// Data e hora locais no formato que vai para o prompt e para o histórico.
+fn agora_local() -> String {
+    chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
+}
+
+/// Id do registro: a hora com milissegundos. Dois pedidos no mesmo milissegundo não acontecem na tela.
+fn id_novo() -> String {
+    format!("ag-{}", chrono::Local::now().format("%Y%m%d%H%M%S%3f"))
+}

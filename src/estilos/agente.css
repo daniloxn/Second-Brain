@@ -1,0 +1,188 @@
+/* Tela do agente: conversa à esquerda, histórico das ações à direita.
+   O layout reage à largura da própria área (consulta de contêiner), porque o explorador
+   de arquivos ocupa parte da janela e o viewport sozinho engana. */
+
+.area-do-agente {
+  container-type: inline-size;
+  height: 100%;
+  min-height: 0;
+}
+
+.tela-agente {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-lg);
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-lg);
+}
+
+.coluna-conversa,
+.coluna-historico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 0;
+}
+
+.coluna-historico {
+  overflow: auto;
+}
+
+.linha-da-situacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.situacao-do-provedor {
+  margin: 0;
+}
+
+.area-da-conversa {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.conversa-do-agente {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fala {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: 12px 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.fala-voce {
+  align-self: flex-end;
+  max-width: 85%;
+  background: var(--color-muted);
+}
+
+.fala-erro {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: var(--color-destructive);
+}
+
+.fala p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rotulo-da-fala {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.formulario-pedido {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.formulario-pedido .campo {
+  flex: 1;
+  min-width: 0;
+  resize: vertical;
+}
+
+.lista-historico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-historico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: 12px 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.cabecalho-historico {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: 12px;
+}
+
+.marca-desfeito {
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.pedido-historico {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.item-historico .botao {
+  align-self: flex-start;
+  margin-top: var(--space-xs);
+}
+
+.lista-de-mudancas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.lista-de-mudancas code {
+  overflow-wrap: anywhere;
+}
+
+.lista-de-mudancas pre {
+  max-height: 160px;
+  margin: var(--space-xs) 0 0;
+  padding: var(--space-sm);
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--color-muted);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.titulo-do-texto {
+  margin: var(--space-sm) 0 0;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+@container (max-width: 820px) {
+  .tela-agente {
+    grid-template-columns: 1fr;
+    height: auto;
+    padding: var(--space-md);
+  }
+
+  .coluna-conversa {
+    height: 70vh;
+  }
+}

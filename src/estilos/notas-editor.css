@@ -1,0 +1,111 @@
+/* Nota aberta: barra, modo editar ou ler, status de salvamento e editor. */
+/* ---------- Notas: uma nota aberta ---------- */
+
+.conteudo-nota {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nota {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.barra-nota {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.segmentado {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--color-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.segmentado button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color var(--dur-rapido), background-color var(--dur-rapido);
+}
+
+.segmentado button[aria-pressed="true"] {
+  color: var(--color-foreground);
+  background: var(--color-card);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.status {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.status-erro {
+  color: var(--color-destructive);
+}
+
+.nota-corpo {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+
+.nota-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.nota-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 24px 32px 0;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.titulo-nota {
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.editor .cm-editor {
+  flex: 1;
+  min-width: 0;
+}
+
+.leitura {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 32px 64px;
+}
+

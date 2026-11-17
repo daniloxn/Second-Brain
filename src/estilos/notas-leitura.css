@@ -1,0 +1,102 @@
+/* Leitura do Markdown renderizado e os wikilinks clicáveis. */
+/* Markdown renderizado */
+.prosa {
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+.prosa h1,
+.prosa h2,
+.prosa h3 {
+  margin: 1.4em 0 0.4em;
+  letter-spacing: -0.01em;
+}
+
+.prosa h1 { font-size: 22px; }
+.prosa h2 { font-size: 18px; }
+.prosa h3 { font-size: 15px; }
+
+.prosa p,
+.prosa ul,
+.prosa ol,
+.prosa blockquote,
+.prosa pre,
+.prosa table {
+  margin: 0.7em 0;
+}
+
+.prosa ul,
+.prosa ol {
+  padding-left: 1.4em;
+}
+
+.prosa li + li {
+  margin-top: 0.2em;
+}
+
+.prosa blockquote {
+  margin-left: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border);
+  color: var(--color-muted-foreground);
+}
+
+.prosa code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9em;
+  padding: 1px 5px;
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+.prosa pre {
+  padding: 12px 14px;
+  overflow: auto;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.prosa pre code {
+  padding: 0;
+  background: none;
+}
+
+.prosa table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.prosa th,
+.prosa td {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.prosa a {
+  color: var(--color-primary);
+}
+
+.prosa hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5em 0;
+}
+
+.wiki {
+  padding: 0;
+  font: inherit;
+  color: var(--color-primary);
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  cursor: pointer;
+}
+
+.wiki:hover {
+  border-bottom-style: solid;
+}
+

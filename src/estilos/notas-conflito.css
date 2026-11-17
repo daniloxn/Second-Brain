@@ -1,0 +1,27 @@
+/* Faixa de conflito de uma nota alterada por fora, enquanto ela estava aberta. */
+
+.faixa-conflito {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0 var(--space-lg) var(--space-md);
+  padding: 12px 14px;
+  background: var(--color-card);
+  border: 1px solid rgba(251, 146, 60, 0.5);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
+.faixa-conflito p {
+  margin: 0;
+}
+
+.faixa-conflito code {
+  font-size: 13px;
+}
+
+.faixa-conflito-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}

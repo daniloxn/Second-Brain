@@ -1,0 +1,77 @@
+/* Tokens de cor, fonte e espaçamento, e a base global da página. Valores vêm do design system em design-system/segundo-cerebro/. */
+/*
+ * Tokens: nomes e base vêm do design system gerado pela skill ui-ux-pro-max
+ * (design-system/segundo-cerebro/MASTER.md). A skill gerou só a versão clara;
+ * os valores escuros abaixo foram derivados da mesma paleta (teal + laranja de ação),
+ * com contraste de texto acima de 4.5:1.
+ */
+:root {
+  color-scheme: dark;
+
+  --color-background: #0f1517;
+  --color-card: #141c1f;
+  --color-muted: #1a2427;
+  --color-border: #223035;
+  --color-foreground: #e4eef0;
+  --color-card-foreground: #e4eef0;
+  --color-muted-foreground: #8ea2a8;
+
+  --color-primary: #2dd4bf;
+  --color-on-primary: #042f2e;
+  --color-accent: #fb923c;
+  --color-on-accent: #1c0f02;
+  --color-destructive: #f87171;
+  --color-ring: #2dd4bf;
+
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  --dur-rapido: 150ms;
+
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-foreground);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pequeno {
+  font-size: 12px;
+}
+

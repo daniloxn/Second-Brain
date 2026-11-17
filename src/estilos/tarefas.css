@@ -1,0 +1,155 @@
+/* Tela de tarefas: grupos por situação, linhas com caixa de conclusão, prioridade e prazo. */
+
+.tela-tarefas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 820px;
+}
+
+.grupo-tarefas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.lista-tarefas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item-tarefa {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur-rapido), border-color var(--dur-rapido);
+}
+
+.item-tarefa:hover {
+  background: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.caixa-tarefa {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
+  padding: 0;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.caixa-tarefa:hover {
+  color: var(--color-primary);
+}
+
+.item-tarefa-concluida .caixa-tarefa {
+  color: var(--color-primary);
+}
+
+.item-tarefa-concluida .titulo-tarefa {
+  color: var(--color-muted-foreground);
+  text-decoration: line-through;
+}
+
+.corpo-tarefa {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.titulo-tarefa {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.detalhes-tarefa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.etiqueta-prioridade {
+  padding: 1px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.prioridade-alta {
+  color: var(--color-destructive);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.prioridade-media {
+  color: var(--color-accent);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+.prioridade-baixa {
+  color: var(--color-muted-foreground);
+}
+
+.item-tarefa-atrasada .prazo-tarefa {
+  color: var(--color-destructive);
+  font-weight: 600;
+}
+
+.item-tarefa-hoje .prazo-tarefa {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.tag-tarefa {
+  color: var(--color-primary);
+}
+
+.form-nova-tarefa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.linha-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.campo-rotulado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  flex: 1;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.campo-rotulado .campo {
+  color: var(--color-foreground);
+}
+
+.campo:disabled {
+  opacity: 0.5;
+}
