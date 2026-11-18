@@ -1,0 +1,114 @@
+/* Painel de filtros do grafo: caixa de vidro flutuando sobre o universo, com busca, filtros e pastas. */
+/* Usa a variável --grafo-vidro, definida em grafo.css na própria tela do grafo. */
+
+/* ---------- Painel de filtros flutuante ---------- */
+
+.grafo-alternar-painel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  background: var(--grafo-vidro);
+  backdrop-filter: blur(10px);
+}
+
+.grafo-painel {
+  position: absolute;
+  top: 60px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 272px;
+  max-height: calc(100% - 140px);
+  padding: var(--space-md);
+  overflow: auto;
+  background: var(--grafo-vidro);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(14px);
+}
+
+.grafo-busca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-muted-foreground);
+}
+
+.grafo-resultados,
+.grafo-pastas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grafo-resultado,
+.grafo-pasta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--color-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--dur-rapido), border-color var(--dur-rapido);
+}
+
+.grafo-resultado:hover,
+.grafo-pasta:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.grafo-pasta[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--color-primary);
+}
+
+.grafo-pasta-cor {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.grafo-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.grafo-opcao {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 28px;
+}
+
+/* ---------- Telas estreitas: o painel vira uma folha sobre o rodapé ---------- */
+
+@media (max-width: 900px) {
+  .grafo-painel {
+    top: auto;
+    right: 12px;
+    bottom: 68px;
+    left: 12px;
+    width: auto;
+    max-height: 45%;
+  }
+}

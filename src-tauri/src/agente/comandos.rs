@@ -2,7 +2,7 @@
 //! prompt, provedor, histórico e desfazer. A lógica de cada peça fica no próprio módulo.
 
 use super::aquecimento::{iniciar_aquecimento, AquecimentoDoAgente, EstadoDoAquecimento};
-use super::contrato::{EstadoDoProvedor, RegistroDoAgente};
+use super::contrato::{EstadoDoProvedor, FalaDaConversa, RegistroDoAgente};
 use super::desfazer::desfazer_registro;
 use super::diferencas::comparar_fotos;
 use super::executar::{comando_esta_instalado, executar_provedor};
@@ -43,9 +43,14 @@ pub fn aquecer_agente(app: tauri::AppHandle) {
 /// Envia um pedido ao agente. Roda em outra thread, porque uma rodada pode levar minutos.
 /// Devolve o registro do pedido, ou o erro do agente (as mudanças feitas ficam no histórico mesmo assim).
 #[tauri::command]
-pub async fn enviar_pedido_ao_agente(app: tauri::AppHandle, pedido: String) -> Result<RegistroDoAgente, String> {
+pub async fn enviar_pedido_ao_agente(
+    app: tauri::AppHandle,
+    pedido: String,
+    conversa_anterior: Vec<FalaDaConversa>,
+) -> Result<RegistroDoAgente, String> {
     let pedido_validado = validar_pedido(&pedido)?;
-    let resultado = tauri::async_runtime::spawn_blocking(move || executar_pedido(&app, &pedido_validado)).await;
+    let resultado =
+        tauri::async_runtime::spawn_blocking(move || executar_pedido(&app, &pedido_validado, &conversa_anterior)).await;
     resultado.map_err(|erro| erro.to_string())?
 }
 
@@ -78,13 +83,23 @@ pub fn desfazer_acao_do_agente(app: tauri::AppHandle, id: String) -> Result<Regi
 
 /// Pedido de ponta a ponta: foto de antes, rodada do agente, foto de depois, registro no log.
 /// O registro é gravado mesmo quando o agente falha, para o que ele mudou não se perder.
-fn executar_pedido(app: &tauri::AppHandle, pedido: &str) -> Result<RegistroDoAgente, String> {
+fn executar_pedido(
+    app: &tauri::AppHandle,
+    pedido: &str,
+    conversa_anterior: &[FalaDaConversa],
+) -> Result<RegistroDoAgente, String> {
     let raiz = raiz_do_cofre_ativo(app)?;
     let pasta_do_cofre = texto_para_frontend(&raiz);
     let foto_de_antes = tirar_foto(&raiz)?;
 
     let provedor = provedor_ativo();
-    let prompt = montar_prompt(pedido, ler_regras_do_cofre(&raiz).as_deref(), &agora_local(), &pasta_do_cofre);
+    let prompt = montar_prompt(
+        pedido,
+        conversa_anterior,
+        ler_regras_do_cofre(&raiz).as_deref(),
+        &agora_local(),
+        &pasta_do_cofre,
+    );
     let resultado = executar_provedor(provedor.as_ref(), &prompt, &pasta_do_cofre);
 
     let foto_de_depois = tirar_foto(&raiz)?;
@@ -95,9 +110,12 @@ fn executar_pedido(app: &tauri::AppHandle, pedido: &str) -> Result<RegistroDoAge
     resultado.map(|_| registro)
 }
 
-/// Regras escritas pelo usuário em `_sistema/AGENTS.md`, cortadas no limite. None se não houver arquivo.
+/// Regras escritas pelo usuário em `_sistema/AGENTS.md` (ou, em cofres antigos, `AGENTS.md` na raiz),
+/// cortadas no limite. None se não houver arquivo em nenhum dos dois lugares.
 fn ler_regras_do_cofre(raiz_do_cofre: &Path) -> Option<String> {
-    let texto = fs::read_to_string(raiz_do_cofre.join("_sistema").join("AGENTS.md")).ok()?;
+    let texto = fs::read_to_string(raiz_do_cofre.join("_sistema").join("AGENTS.md"))
+        .or_else(|_| fs::read_to_string(raiz_do_cofre.join("AGENTS.md")))
+        .ok()?;
     Some(texto.chars().take(LIMITE_DAS_REGRAS_EM_CARACTERES).collect())
 }
 

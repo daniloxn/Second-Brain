@@ -25,13 +25,7 @@ export const SECOES_DO_MENU: SecaoDoMenu[] = [
   { id: "arquivos", titulo: "Arquivos", icone: Folder, faseDeEntrega: null, descricaoDoAviso: "" },
   { id: "notas", titulo: "Notas", icone: FileText, faseDeEntrega: null, descricaoDoAviso: "" },
   { id: "tarefas", titulo: "Tarefas", icone: CheckSquare, faseDeEntrega: null, descricaoDoAviso: "" },
-  {
-    id: "grafo",
-    titulo: "Grafo",
-    icone: Brain,
-    faseDeEntrega: "fase 3",
-    descricaoDoAviso: "Suas notas como um mapa 3D de conexões.",
-  },
+  { id: "grafo", titulo: "Grafo", icone: Brain, faseDeEntrega: null, descricaoDoAviso: "" },
   {
     id: "segredos",
     titulo: "Segredos",

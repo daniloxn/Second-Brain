@@ -97,7 +97,7 @@ mod testes {
         assert!(e_cofre_do_app(&cofre));
         assert!(cofre.join("tarefas").is_dir());
         assert!(cofre.join("notas/anotacoes").is_dir());
-        assert!(cofre.join("AGENTS.md").is_file());
+        assert!(cofre.join("_sistema").join("AGENTS.md").is_file());
         fs::remove_dir_all(&pasta_pai).unwrap();
     }
 

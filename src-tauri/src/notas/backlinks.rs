@@ -2,7 +2,8 @@
 //! apontam por wikilink para a nota escolhida.
 
 use super::indice::{
-    coletar_caminhos_de_notas, e_arquivo_de_nota, nome_sem_extensao, PROFUNDIDADE_DE_BUSCA_DE_NOTAS,
+    arquivo_e_grande_demais, coletar_caminhos_de_notas, e_arquivo_de_nota, nome_sem_extensao,
+    PROFUNDIDADE_DE_BUSCA_DE_NOTAS,
 };
 use super::wikilinks::extrair_alvos_dos_wikilinks;
 use crate::cofre::caminhos::{caminho_dentro_do_cofre, raiz_do_cofre_ativo, texto_para_frontend};
@@ -12,9 +13,6 @@ use std::path::PathBuf;
 
 /// Quantidade máxima de backlinks devolvidos de uma vez.
 const LIMITE_DE_BACKLINKS: usize = 300;
-
-/// Arquivos maiores que isso não são lidos ao procurar links, para não travar a busca.
-const TAMANHO_MAXIMO_DE_LEITURA_EM_BYTES: u64 = 2 * 1024 * 1024;
 
 /// Uma linha de outra nota que aponta para a nota consultada.
 #[derive(Serialize)]
@@ -68,12 +66,4 @@ pub(crate) fn procurar_backlinks(app: &tauri::AppHandle, caminho_da_nota: &str) 
         }
     }
     Ok(backlinks_encontrados)
-}
-
-/// Verdadeiro se o arquivo passa do limite de leitura. Se não for possível ler o
-/// tamanho, trata como grande e pula, para não arriscar travar a busca.
-fn arquivo_e_grande_demais(caminho: &std::path::Path) -> bool {
-    fs::metadata(caminho)
-        .map(|metadados| metadados.len() > TAMANHO_MAXIMO_DE_LEITURA_EM_BYTES)
-        .unwrap_or(true)
 }

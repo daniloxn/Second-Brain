@@ -15,6 +15,8 @@ import "./estilos/notas-leitura.css";
 import "./estilos/notas-backlinks.css";
 import "./estilos/tarefas.css";
 import "./estilos/agente.css";
+import "./estilos/grafo.css";
+import "./estilos/grafo-painel.css";
 import "./estilos/notas-conflito.css";
 import "./estilos/cofre-inicio.css";
 import "./estilos/responsivo.css";

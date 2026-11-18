@@ -6,6 +6,7 @@ use tauri::Manager;
 mod agente;
 mod cofre;
 mod configuracao;
+mod grafo;
 mod notas;
 mod tarefas;
 
@@ -36,6 +37,7 @@ pub fn run() {
             notas::comandos::criar_nota,
             notas::comandos::backlinks,
             notas::comandos::guardar_copia_do_conflito,
+            grafo::comandos::grafo_do_cofre,
             tarefas::comandos::listar_tarefas,
             tarefas::comandos::criar_tarefa,
             tarefas::comandos::atualizar_tarefa,

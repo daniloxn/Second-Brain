@@ -1,0 +1,186 @@
+﻿/* Tela do grafo: o universo ocupa a Ã¡rea toda; resumo, rÃ³tulos e controles flutuam por cima. O painel de filtros estÃ¡ em grafo-painel.css. */
+
+.conteudo.conteudo-grafo {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tela-grafo {
+  /* Fundo do espaÃ§o: quase preto, com manchas de luz quente no centro e frias nos cantos. */
+  --grafo-fundo: #04060a;
+  --grafo-vidro: color-mix(in srgb, var(--color-background) 72%, transparent);
+
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 52%, rgba(255, 170, 90, 0.1), transparent 70%),
+    radial-gradient(circle at 18% 22%, rgba(110, 130, 255, 0.08), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(200, 110, 255, 0.06), transparent 45%),
+    var(--grafo-fundo);
+}
+
+.grafo-quadro {
+  position: absolute;
+  inset: 0;
+  /* Camada própria: os rótulos das constelações recebem z-index altos da biblioteca 3D e, sem isto,
+     apareceriam por cima do painel de filtros. */
+  isolation: isolate;
+}
+
+.grafo-cena {
+  position: absolute;
+  inset: 0;
+}
+
+.grafo-cena canvas {
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+
+.grafo-aviso {
+  padding: var(--space-lg) 24px;
+}
+
+/* ---------- RÃ³tulos das constelaÃ§Ãµes e botÃ£o Home ---------- */
+
+.grafo-rotulos {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.grafo-rotulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.grafo-rotulo strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.grafo-rotulo span {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.grafo-home {
+  padding: 3px 12px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--color-foreground);
+  background: var(--grafo-vidro);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: border-color var(--dur-rapido);
+}
+
+.grafo-home:hover {
+  border-color: var(--color-primary);
+}
+
+/* ---------- Dica ao passar o mouse ---------- */
+
+.grafo-dica {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 260px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+  background: var(--grafo-vidro);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.grafo-dica strong {
+  color: var(--color-foreground);
+  font-size: 13px;
+}
+
+/* ---------- Resumo no canto ---------- */
+
+.grafo-resumo {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  max-width: 50%;
+  pointer-events: none;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+}
+
+.grafo-resumo h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.grafo-resumo p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+/* ---------- Controles flutuantes ---------- */
+
+.grafo-controles {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--grafo-vidro);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  transform: translateX(-50%);
+}
+
+.grafo-controle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--dur-rapido), background-color var(--dur-rapido);
+}
+
+.grafo-controle:hover {
+  color: var(--color-foreground);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Telas estreitas ---------- */
+
+@media (max-width: 900px) {
+  .grafo-resumo {
+    top: 16px;
+    left: 16px;
+    max-width: 55%;
+  }
+
+  .grafo-resumo h2 {
+    font-size: 17px;
+  }
+}

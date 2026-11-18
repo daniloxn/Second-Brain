@@ -21,6 +21,16 @@ struct SaidaDoAgy {
     status: String,
     response: String,
     error: Option<String>,
+    /// Ações que o modo sem interação negou (ex.: comando de terminal). Quando o agente depende
+    /// de uma delas, o `agy` termina com SUCCESS e `response` vazio, sem avisar de outro jeito.
+    #[serde(default)]
+    denied_actions: Vec<AcaoNegadaPeloAgy>,
+}
+
+/// Uma ação negada na rodada. Só o nome para mostrar interessa.
+#[derive(Deserialize)]
+struct AcaoNegadaPeloAgy {
+    display_name: String,
 }
 
 impl ProvedorAgente for AdaptadorAgy {
@@ -56,7 +66,21 @@ impl ProvedorAgente for AdaptadorAgy {
             let motivo = saida_lida.error.unwrap_or_default();
             return Err(format!("o agente terminou com status {} {motivo}", saida_lida.status).trim_end().to_string());
         }
-        Ok(saida_lida.response.trim().to_string())
+        let resposta = saida_lida.response.trim().to_string();
+        if resposta.is_empty() {
+            // Resposta vazia nunca é um sucesso útil: avisa o motivo em vez de mostrar uma bolha em branco.
+            let nomes_das_acoes_negadas: Vec<&str> =
+                saida_lida.denied_actions.iter().map(|acao| acao.display_name.as_str()).collect();
+            return Err(if nomes_das_acoes_negadas.is_empty() {
+                "o agente terminou sem escrever resposta. Tente de novo".to_string()
+            } else {
+                format!(
+                    "o agente tentou usar uma ação bloqueada pelo app ({}) e ficou sem resposta. Tente reformular o pedido",
+                    nomes_das_acoes_negadas.join(", ")
+                )
+            });
+        }
+        Ok(resposta)
     }
 }
 
@@ -81,6 +105,19 @@ mod testes {
     #[test]
     fn resposta_com_erro_de_status_falha() {
         let saida = r#"{"status":"ERROR","response":""}"#;
+        assert!(AdaptadorAgy.ler_resposta(saida).is_err());
+    }
+
+    #[test]
+    fn resposta_vazia_com_acao_negada_explica_o_bloqueio() {
+        let saida = r#"{"status":"SUCCESS","response":"","denied_actions":[{"action":"command","display_name":"Bash"}]}"#;
+        let erro = AdaptadorAgy.ler_resposta(saida).unwrap_err();
+        assert!(erro.contains("Bash"));
+    }
+
+    #[test]
+    fn resposta_vazia_sem_acao_negada_tambem_falha() {
+        let saida = r#"{"status":"SUCCESS","response":"  "}"#;
         assert!(AdaptadorAgy.ler_resposta(saida).is_err());
     }
 

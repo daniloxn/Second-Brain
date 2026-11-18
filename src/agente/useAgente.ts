@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { desfazerAcaoDoAgente, enviarPedidoAoAgente, estadoDoAgente, listarHistoricoDoAgente } from "./chamadasAgente";
-import type { EstadoDoProvedor, RegistroDoAgente } from "./contratoAgente";
+import type { EstadoDoProvedor, FalaParaOAgente, RegistroDoAgente } from "./contratoAgente";
 import { useAquecimentoDoAgente } from "./useAquecimentoDoAgente";
 
 /** Uma fala da conversa: o que o usuário pediu, a resposta do agente ou um erro. */
@@ -71,9 +71,13 @@ export function useAgente() {
   async function enviarPedido(pedido: string) {
     setEnviando(true);
     setMensagemDeErro(null);
+    // Conversa até aqui, sem os erros: o agente precisa dela para entender "isso" e "sim".
+    const conversaAnterior: FalaParaOAgente[] = mensagens.flatMap((mensagem) =>
+      mensagem.papel === "erro" ? [] : [{ papel: mensagem.papel, texto: mensagem.texto }],
+    );
     acrescentarMensagem("voce", pedido, null);
     try {
-      const registro = await enviarPedidoAoAgente(pedido);
+      const registro = await enviarPedidoAoAgente(pedido, conversaAnterior);
       acrescentarMensagem("agente", registro.resposta, registro);
     } catch (erro) {
       acrescentarMensagem("erro", String(erro), null);

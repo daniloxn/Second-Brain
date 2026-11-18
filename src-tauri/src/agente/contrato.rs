@@ -39,6 +39,15 @@ pub struct RegistroDoAgente {
     pub desfeito: bool,
 }
 
+/// Uma fala da conversa da tela, enviada junto do pedido para o agente entender "isso", "aquilo" e "sim".
+/// `papel` é "voce" ou "agente". Espelha `FalaParaOAgente` em `src/agente/contratoAgente.ts`.
+#[derive(Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct FalaDaConversa {
+    pub papel: String,
+    pub texto: String,
+}
+
 /// Situação do provedor de agente na máquina.
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
