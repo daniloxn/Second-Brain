@@ -7,9 +7,16 @@ import { HistoricoDoAgente } from "./HistoricoDoAgente";
 import { textoDaSituacaoDoAquecimento } from "./formatacaoAgente";
 import { useAgente } from "./useAgente";
 
-export function TelaDoAgente() {
+interface Props {
+  pedidoInicial?: string | null;
+  aoConsumirPedidoInicial?: () => void;
+}
+
+/** Mostra a conversa e permite receber um pedido inicial já preenchido pela importação. */
+export function TelaDoAgente({ pedidoInicial, aoConsumirPedidoInicial }: Props) {
   const {
     estadoDoProvedor,
+    trocarProvedor,
     aquecimento,
     tentarDeNovoAquecimento,
     historico,
@@ -30,6 +37,20 @@ export function TelaDoAgente() {
       <div className="tela-agente">
         <section className="coluna-conversa" aria-label="Conversa com o agente">
           <div className="linha-da-situacao">
+            <div className="seletor-provedor">
+              <label htmlFor="seletor-provedor-agente">Provedor</label>
+              <select
+                id="seletor-provedor-agente"
+                value={estadoDoProvedor?.id ?? "opencode"}
+                disabled={enviando}
+                onChange={(evento) => void trocarProvedor(evento.target.value)}
+              >
+                <option value="opencode">OpenCode</option>
+                <option value="codex">Codex</option>
+                <option value="claude">Claude Code</option>
+                <option value="ollama">Ollama local · somente conversa</option>
+              </select>
+            </div>
             <p className="suave situacao-do-provedor">{textoDaSituacao}</p>
             {aquecimento?.situacao === "falhou" && (
               <button type="button" className="botao" onClick={tentarDeNovoAquecimento}>
@@ -41,7 +62,12 @@ export function TelaDoAgente() {
           <div className="area-da-conversa">
             <ConversaDoAgente mensagens={mensagens} enviando={enviando} />
           </div>
-          <FormularioDoPedido desativado={enviando || !provedorPronto} aoEnviar={enviarPedido} />
+          <FormularioDoPedido
+            desativado={enviando || !provedorPronto}
+            aoEnviar={enviarPedido}
+            pedidoInicial={pedidoInicial}
+            aoConsumirPedidoInicial={aoConsumirPedidoInicial}
+          />
         </section>
 
         <aside className="coluna-historico" aria-label="Histórico das ações do agente">

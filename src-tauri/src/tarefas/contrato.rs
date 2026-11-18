@@ -41,6 +41,8 @@ pub struct TarefaDto {
     pub prazo: Option<String>,
     pub origem: String,
     pub tags: Vec<String>,
+    /// "nenhuma" ou "diaria".
+    pub recorrencia: String,
     /// "atrasada" | "hoje" | "proxima" | "sem_prazo" | "concluida"
     pub situacao: String,
 }
@@ -48,16 +50,26 @@ pub struct TarefaDto {
 impl TarefaDto {
     /// Converte uma tarefa do domínio para o formato do contrato, calculando a situação em `agora`.
     pub fn de_tarefa(tarefa: &Tarefa, agora: NaiveDateTime) -> Self {
-        let situacao: SituacaoTarefa = situacao_da_tarefa(tarefa, agora);
+        let mut tarefa_do_dia = tarefa.clone();
+        if tarefa.recorrencia_diaria {
+            tarefa_do_dia.prazo = Some(PrazoTarefa::SoData(agora.date()));
+            if tarefa.status.esta_concluida()
+                && tarefa.ultima_conclusao.map_or(true, |conclusao| conclusao < agora.date())
+            {
+                tarefa_do_dia.status = super::valores::StatusTarefa::Aberta;
+            }
+        }
+        let situacao: SituacaoTarefa = situacao_da_tarefa(&tarefa_do_dia, agora);
         Self {
             id: tarefa.id.clone(),
             titulo: tarefa.titulo.clone(),
             descricao: tarefa.descricao.trim().to_string(),
-            status: tarefa.status.como_texto().to_string(),
+            status: tarefa_do_dia.status.como_texto().to_string(),
             prioridade: tarefa.prioridade.como_texto().to_string(),
-            prazo: tarefa.prazo.as_ref().map(PrazoTarefa::como_texto),
+            prazo: tarefa_do_dia.prazo.as_ref().map(PrazoTarefa::como_texto),
             origem: tarefa.origem.clone(),
             tags: tarefa.tags.clone(),
+            recorrencia: if tarefa.recorrencia_diaria { "diaria" } else { "nenhuma" }.to_string(),
             situacao: situacao.como_texto().to_string(),
         }
     }
@@ -78,6 +90,8 @@ pub struct NovaTarefaDto {
     pub origem: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub recorrencia: Option<String>,
 }
 
 /// Dados enviados por `atualizar_tarefa`. Campo ausente significa "não mudar".
@@ -92,6 +106,7 @@ pub struct AlteracaoTarefaDto {
     pub prazo: Option<String>,
     pub origem: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub recorrencia: Option<String>,
 }
 
 #[cfg(test)]
@@ -106,7 +121,7 @@ mod testes {
         let json = serde_json::to_value(TarefaDto::de_tarefa(&tarefa, agora)).unwrap();
 
         // Estes nomes são o contrato. Se algum mudar, o frontend quebra.
-        for chave in ["id", "titulo", "descricao", "status", "prioridade", "prazo", "origem", "tags", "situacao"] {
+        for chave in ["id", "titulo", "descricao", "status", "prioridade", "prazo", "origem", "tags", "recorrencia", "situacao"] {
             assert!(json.get(chave).is_some(), "falta o campo {chave} no contrato");
         }
         assert_eq!(json["prazo"], "2026-11-18");

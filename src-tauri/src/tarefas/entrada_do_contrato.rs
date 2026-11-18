@@ -22,6 +22,7 @@ impl NovaTarefaDto {
             prazo: converter_prazo_opcional(self.prazo.as_deref())?,
             origem: self.origem.unwrap_or_default(),
             tags: self.tags,
+            recorrencia_diaria: converter_recorrencia(self.recorrencia.as_deref())?,
         })
     }
 }
@@ -47,6 +48,11 @@ impl AlteracaoTarefaDto {
             None => None,
             Some(texto) => Some(converter_prazo_opcional(Some(texto))?),
         };
+        let recorrencia_diaria = self
+            .recorrencia
+            .as_deref()
+            .map(|texto| converter_recorrencia(Some(texto)))
+            .transpose()?;
 
         Ok(AlteracaoDeTarefa {
             titulo: self.titulo,
@@ -56,7 +62,17 @@ impl AlteracaoTarefaDto {
             prazo,
             origem: self.origem,
             tags: self.tags,
+            recorrencia_diaria,
         })
+    }
+}
+
+/// Converte a recorrência do contrato, aceitando ausência como tarefa sem repetição.
+fn converter_recorrencia(texto: Option<&str>) -> Result<bool, String> {
+    match texto.map(str::trim) {
+        None | Some("") | Some("nenhuma") => Ok(false),
+        Some("diaria") => Ok(true),
+        Some(valor) => Err(format!("recorrência inválida: \"{valor}\"")),
     }
 }
 
@@ -83,6 +99,7 @@ mod testes {
             prazo: Some(prazo.to_string()),
             origem: None,
             tags: None,
+            recorrencia: None,
         }
     }
 
@@ -95,6 +112,7 @@ mod testes {
             prazo: None,
             origem: None,
             tags: Vec::new(),
+            recorrencia: None,
         };
         assert!(dto.para_nova_tarefa().is_err());
     }

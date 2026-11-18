@@ -1,17 +1,25 @@
 // Campo para escrever o pedido ao agente. Enter envia; Shift+Enter quebra a linha.
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 
 interface Props {
   /** Desliga o campo enquanto o agente responde ou quando o provedor não está instalado. */
   desativado: boolean;
   aoEnviar: (pedido: string) => void;
+  pedidoInicial?: string | null;
+  aoConsumirPedidoInicial?: () => void;
 }
 
-export function FormularioDoPedido({ desativado, aoEnviar }: Props) {
-  const [pedidoDigitado, setPedidoDigitado] = useState("");
+export function FormularioDoPedido({ desativado, aoEnviar, pedidoInicial, aoConsumirPedidoInicial }: Props) {
+  const [pedidoDigitado, setPedidoDigitado] = useState(pedidoInicial ?? "");
   const pedidoPronto = pedidoDigitado.trim() !== "";
+
+  useEffect(() => {
+    if (!pedidoInicial) return;
+    setPedidoDigitado(pedidoInicial);
+    aoConsumirPedidoInicial?.();
+  }, [pedidoInicial, aoConsumirPedidoInicial]);
 
   /** Envia o texto digitado e limpa o campo. Ignora pedido vazio ou com o campo desligado. */
   function enviarPedidoDigitado() {

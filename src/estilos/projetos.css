@@ -1,0 +1,140 @@
+/* Painel de projetos e navegação entre os documentos que os agentes mantêm. */
+
+.tela-projetos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 100%;
+}
+
+.topo-projetos p {
+  margin-top: 4px;
+}
+
+.form-novo-projeto {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  max-width: 620px;
+}
+
+.form-novo-projeto .campo-rotulado {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.form-novo-projeto .campo-rotulado span {
+  flex-shrink: 0;
+}
+
+.painel-projetos {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  flex: 1;
+  min-height: 360px;
+  overflow: hidden;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.lista-projetos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  padding: 8px;
+  border-right: 1px solid var(--color-border);
+}
+
+.botao-projeto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  color: var(--color-foreground);
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.botao-projeto:hover,
+.botao-projeto[aria-current="true"] {
+  background: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.botao-projeto span {
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+}
+
+.detalhe-projeto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.cabecalho-projeto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cabecalho-projeto h3 {
+  margin: 0 0 3px;
+}
+
+.cabecalho-projeto span {
+  font-size: 12px;
+}
+
+.abas-documentos-projeto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.abas-documentos-projeto .botao[aria-selected="true"] {
+  border-color: var(--color-primary);
+}
+
+.markdown-projeto {
+  overflow: auto;
+  padding: 16px 20px;
+  line-height: 1.65;
+}
+
+.markdown-projeto > :first-child {
+  margin-top: 0;
+}
+
+.markdown-projeto pre {
+  overflow: auto;
+  padding: 12px;
+  background: var(--color-muted);
+  border-radius: var(--radius-sm);
+}
+
+.markdown-projeto code {
+  font-family: var(--font-mono, monospace);
+}
+
+@media (max-width: 760px) {
+  .painel-projetos {
+    grid-template-columns: minmax(110px, 32%) minmax(0, 1fr);
+  }
+
+  .form-novo-projeto {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

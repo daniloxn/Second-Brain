@@ -32,6 +32,7 @@ export interface FalaParaOAgente {
 
 /** Provedor de agente e se o programa dele está instalado. */
 export interface EstadoDoProvedor {
+  id: string;
   nome: string;
   comando: string;
   instalado: boolean;

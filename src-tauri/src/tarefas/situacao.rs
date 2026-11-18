@@ -75,6 +75,8 @@ mod testes {
             prazo: prazo.and_then(PrazoTarefa::do_texto),
             origem: String::new(),
             tags: Vec::new(),
+            recorrencia_diaria: false,
+            ultima_conclusao: None,
             campos_extras: Vec::new(),
         }
     }

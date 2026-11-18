@@ -10,6 +10,7 @@ export const VERSAO_DO_CONTRATO_ESPERADA = 1;
 export type StatusDaTarefa = "aberta" | "fazendo" | "feita" | "arquivada";
 export type PrioridadeDaTarefa = "alta" | "media" | "baixa";
 export type SituacaoDaTarefa = "atrasada" | "hoje" | "proxima" | "sem_prazo" | "concluida";
+export type RecorrenciaDaTarefa = "nenhuma" | "diaria";
 
 /** Uma tarefa como o backend a envia. `situacao` já vem calculada. */
 export interface TarefaDoContrato {
@@ -22,6 +23,7 @@ export interface TarefaDoContrato {
   prazo: string | null;
   origem: string;
   tags: string[];
+  recorrencia: RecorrenciaDaTarefa;
   situacao: SituacaoDaTarefa;
 }
 
@@ -40,6 +42,7 @@ export interface NovaTarefaParaCriar {
   prazo?: string;
   origem?: string;
   tags?: string[];
+  recorrencia?: RecorrenciaDaTarefa;
 }
 
 /** Alterações parciais. Campo ausente não muda; `prazo: ""` remove o prazo. */
@@ -51,6 +54,7 @@ export interface AlteracaoDaTarefa {
   prazo?: string;
   origem?: string;
   tags?: string[];
+  recorrencia?: RecorrenciaDaTarefa;
 }
 
 /** Lista as tarefas. Lança erro se a versão do contrato não for a esperada. */
@@ -71,3 +75,7 @@ export const criarTarefaNoCofre = (entrada: NovaTarefaParaCriar) =>
 /** Altera uma tarefa pelo id e devolve a tarefa já atualizada. */
 export const atualizarTarefaNoCofre = (idDaTarefa: string, alteracao: AlteracaoDaTarefa) =>
   invoke<TarefaDoContrato>("atualizar_tarefa", { id: idDaTarefa, alteracao });
+
+/** Apaga uma tarefa pelo identificador do arquivo no cofre ativo. */
+export const apagarTarefaDoCofre = (idDaTarefa: string) =>
+  invoke<void>("apagar_tarefa", { id: idDaTarefa });

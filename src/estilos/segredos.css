@@ -1,0 +1,98 @@
+/* Tela e cartões do cofre de segredos. O estilo não contém dados de credenciais. */
+
+.tela-segredos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 820px;
+}
+
+.topo-segredos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.topo-segredos p {
+  margin-top: 4px;
+}
+
+.form-segredo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 560px;
+  padding: 18px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.form-segredo h3,
+.item-segredo h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.form-segredo p {
+  margin: 0;
+}
+
+.form-segredo textarea.campo {
+  height: auto;
+  min-height: 76px;
+  padding: 8px 12px;
+  resize: vertical;
+}
+
+.lista-segredos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.item-segredo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.corpo-segredo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.corpo-segredo p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.anotacoes-segredo {
+  white-space: pre-wrap;
+}
+
+.acoes-segredo {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.botao-apagar-segredo {
+  color: var(--color-destructive);
+}
+
+@media (max-width: 600px) {
+  .item-segredo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

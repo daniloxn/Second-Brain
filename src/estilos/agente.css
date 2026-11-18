@@ -40,6 +40,27 @@
   margin: 0;
 }
 
+.seletor-provedor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.seletor-provedor label {
+  color: var(--texto-suave);
+  font-size: 0.78rem;
+}
+
+.seletor-provedor select {
+  max-width: 205px;
+  padding: 7px 9px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+}
+
 .area-da-conversa {
   flex: 1;
   min-height: 0;

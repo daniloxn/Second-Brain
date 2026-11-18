@@ -25,6 +25,11 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = { version = "0.4.45", features = ["clock"] }
 tauri-plugin-notification = "2.8.1"
+tauri-plugin-clipboard-manager = "2.5.0"
+argon2 = "0.5.3"
+aes-gcm = "0.11.1"
+getrandom = "0.3"
+zeroize = { version = "1", features = ["derive"] }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

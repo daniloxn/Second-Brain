@@ -48,6 +48,10 @@
   height: 100%;
 }
 
+.app-sem-explorador {
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+
 .trilho {
   display: flex;
   flex-direction: column;

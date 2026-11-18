@@ -62,6 +62,8 @@ pub fn montar_nova_tarefa(id: String, entrada: NovaTarefa) -> Result<Tarefa, Str
         prazo: entrada.prazo,
         origem: entrada.origem.trim().to_string(),
         tags: validar_tags(&entrada.tags)?,
+        recorrencia_diaria: entrada.recorrencia_diaria,
+        ultima_conclusao: None,
         // Todo arquivo de tarefa leva `tipo: tarefa`, como no PLANO.md.
         campos_extras: vec![("tipo".to_string(), "tarefa".to_string())],
     })
@@ -90,6 +92,12 @@ pub fn aplicar_alteracao(tarefa: &mut Tarefa, alteracao: AlteracaoDeTarefa) -> R
     if let Some(tags_novas) = alteracao.tags {
         tarefa.tags = validar_tags(&tags_novas)?;
     }
+    if let Some(recorrencia_diaria) = alteracao.recorrencia_diaria {
+        tarefa.recorrencia_diaria = recorrencia_diaria;
+        if !recorrencia_diaria {
+            tarefa.ultima_conclusao = None;
+        }
+    }
     Ok(())
 }
 
@@ -115,6 +123,8 @@ mod testes {
             prazo: prazo.and_then(PrazoTarefa::do_texto),
             origem: String::new(),
             tags: Vec::new(),
+            recorrencia_diaria: false,
+            ultima_conclusao: None,
             campos_extras: Vec::new(),
         }
     }

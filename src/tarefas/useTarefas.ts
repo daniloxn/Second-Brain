@@ -4,9 +4,11 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   atualizarTarefaNoCofre,
+  apagarTarefaDoCofre,
   criarTarefaNoCofre,
   listarTarefasDoCofre,
   type NovaTarefaParaCriar,
+  type AlteracaoDaTarefa,
   type StatusDaTarefa,
   type TarefaDoContrato,
 } from "./contratoTarefas";
@@ -54,5 +56,29 @@ export function useTarefas() {
     [recarregarTarefas],
   );
 
-  return { tarefas, estaCarregando, mensagemDeErro, criarTarefa, mudarStatusDaTarefa };
+  /** Salva as alterações de uma tarefa e recarrega a lista. */
+  const editarTarefa = useCallback(
+    async (idDaTarefa: string, alteracao: AlteracaoDaTarefa) => {
+      await atualizarTarefaNoCofre(idDaTarefa, alteracao);
+      await recarregarTarefas();
+    },
+    [recarregarTarefas],
+  );
+
+  /** Apaga uma tarefa e atualiza a lista, mostrando erros no painel. */
+  const apagarTarefa = useCallback(
+    async (idDaTarefa: string) => {
+      try {
+        await apagarTarefaDoCofre(idDaTarefa);
+        await recarregarTarefas();
+        return true;
+      } catch (erro) {
+        setMensagemDeErro(String(erro));
+        return false;
+      }
+    },
+    [recarregarTarefas],
+  );
+
+  return { tarefas, estaCarregando, mensagemDeErro, criarTarefa, editarTarefa, apagarTarefa, mudarStatusDaTarefa };
 }

@@ -58,6 +58,12 @@ pub(crate) fn gravar_tarefa_nova(app: &tauri::AppHandle, tarefa: &Tarefa) -> Res
     fs::write(&caminho, tarefa.como_arquivo()).map_err(|erro| erro.to_string())
 }
 
+/// Remove uma tarefa existente depois de validar seu id e o caminho dentro do cofre.
+pub(crate) fn apagar_tarefa(app: &tauri::AppHandle, id: &str) -> Result<(), String> {
+    let caminho = caminho_da_tarefa(app, id)?;
+    fs::remove_file(caminho).map_err(|erro| format!("não foi possível apagar a tarefa: {erro}"))
+}
+
 /// Id livre para um título: o slug do título, ou o slug com número se já existir arquivo igual.
 pub(crate) fn gerar_id_livre(app: &tauri::AppHandle, slug_base: &str) -> Result<String, String> {
     let pasta = pasta_das_tarefas(app)?;

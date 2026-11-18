@@ -7,6 +7,9 @@
     "core:default",
     "opener:default",
     "dialog:default",
-    "notification:default"
+    "notification:default",
+    "clipboard-manager:allow-write-secret",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-clear"
   ]
 }

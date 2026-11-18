@@ -7,16 +7,32 @@ import { useTarefas } from "./useTarefas";
 import { agruparPorSituacao } from "./formatacaoTarefas";
 import { ItemDeTarefa } from "./ItemDeTarefa";
 import { FormularioNovaTarefa } from "./FormularioNovaTarefa";
-import type { NovaTarefaParaCriar } from "./contratoTarefas";
+import type { NovaTarefaParaCriar, TarefaDoContrato } from "./contratoTarefas";
 
 export function TelaDeTarefas() {
-  const { tarefas, estaCarregando, mensagemDeErro, criarTarefa, mudarStatusDaTarefa } = useTarefas();
+  const { tarefas, estaCarregando, mensagemDeErro, criarTarefa, editarTarefa, apagarTarefa, mudarStatusDaTarefa } = useTarefas();
   const [estaCriandoTarefa, setEstaCriandoTarefa] = useState(false);
+  const [tarefaEmEdicao, setTarefaEmEdicao] = useState<TarefaDoContrato | null>(null);
 
   /** Cria a tarefa e fecha o formulário. Erros sobem para o formulário. */
   async function criarEFechar(entrada: NovaTarefaParaCriar) {
     await criarTarefa(entrada);
     setEstaCriandoTarefa(false);
+  }
+
+  /** Salva a tarefa editada e fecha o formulário quando a gravação termina. */
+  async function salvarEdicao(entrada: NovaTarefaParaCriar) {
+    if (!tarefaEmEdicao) return;
+    await editarTarefa(tarefaEmEdicao.id, entrada);
+    setTarefaEmEdicao(null);
+  }
+
+  /** Confirma antes de apagar o arquivo da tarefa do cofre. */
+  async function confirmarApagamento(tarefa: TarefaDoContrato) {
+    if (!window.confirm(`Apagar a tarefa “${tarefa.titulo}”? Essa ação não pode ser desfeita.`)) return;
+    const foiApagada = await apagarTarefa(tarefa.id);
+    if (!foiApagada) return;
+    if (tarefaEmEdicao?.id === tarefa.id) setTarefaEmEdicao(null);
   }
 
   const gruposDeTarefas = agruparPorSituacao(tarefas);
@@ -25,7 +41,7 @@ export function TelaDeTarefas() {
     <div className="tela-tarefas">
       <div className="linha-topo">
         <h2 className="rotulo">{tarefas.length === 1 ? "1 tarefa" : `${tarefas.length} tarefas`}</h2>
-        {!estaCriandoTarefa && (
+        {!estaCriandoTarefa && !tarefaEmEdicao && (
           <button type="button" className="botao botao-primario" onClick={() => setEstaCriandoTarefa(true)}>
             <Plus size={15} aria-hidden="true" />
             Nova tarefa
@@ -39,6 +55,15 @@ export function TelaDeTarefas() {
         <FormularioNovaTarefa aoEnviar={criarEFechar} aoCancelar={() => setEstaCriandoTarefa(false)} />
       )}
 
+      {tarefaEmEdicao && (
+        <FormularioNovaTarefa
+          key={tarefaEmEdicao.id}
+          tarefa={tarefaEmEdicao}
+          aoEnviar={salvarEdicao}
+          aoCancelar={() => setTarefaEmEdicao(null)}
+        />
+      )}
+
       {estaCarregando && <p className="suave">Carregando tarefas…</p>}
 
       {!estaCarregando && tarefas.length === 0 && (
@@ -50,7 +75,16 @@ export function TelaDeTarefas() {
           <h3 className="rotulo">{grupo.rotulo} · {grupo.tarefas.length}</h3>
           <ul className="lista-tarefas">
             {grupo.tarefas.map((tarefa) => (
-              <ItemDeTarefa key={tarefa.id} tarefa={tarefa} aoMudarStatus={mudarStatusDaTarefa} />
+              <ItemDeTarefa
+                key={tarefa.id}
+                tarefa={tarefa}
+                aoMudarStatus={mudarStatusDaTarefa}
+                aoEditar={(tarefaSelecionada) => {
+                  setEstaCriandoTarefa(false);
+                  setTarefaEmEdicao(tarefaSelecionada);
+                }}
+                aoApagar={confirmarApagamento}
+              />
             ))}
           </ul>
         </section>

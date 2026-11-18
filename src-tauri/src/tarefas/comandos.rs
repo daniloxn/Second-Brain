@@ -7,7 +7,7 @@ use super::contrato::{
 };
 use super::validacao::slug_do_titulo;
 use super::regras::{aplicar_alteracao, montar_nova_tarefa, ordenar_por_urgencia};
-use super::repositorio::{gerar_id_livre, gravar_tarefa, gravar_tarefa_nova, ler_tarefa, ler_todas_as_tarefas};
+use super::repositorio::{apagar_tarefa as apagar_arquivo_da_tarefa, gerar_id_livre, gravar_tarefa, gravar_tarefa_nova, ler_tarefa, ler_todas_as_tarefas};
 use chrono::Local;
 
 /// Todas as tarefas do cofre, já ordenadas por urgência e com a situação calculada.
@@ -39,6 +39,15 @@ pub fn atualizar_tarefa(app: tauri::AppHandle, id: String, alteracao: AlteracaoT
     let agora = Local::now().naive_local();
     let mut tarefa = ler_tarefa(&app, &id)?;
     aplicar_alteracao(&mut tarefa, alteracao.para_alteracao()?)?;
+    if tarefa.recorrencia_diaria && tarefa.status == super::valores::StatusTarefa::Feita {
+        tarefa.ultima_conclusao = Some(agora.date());
+    }
     gravar_tarefa(&app, &tarefa)?;
     Ok(TarefaDto::de_tarefa(&tarefa, agora))
+}
+
+/// Apaga uma tarefa pelo identificador do arquivo dentro da pasta `tarefas/`.
+#[tauri::command]
+pub fn apagar_tarefa(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    apagar_arquivo_da_tarefa(&app, &id)
 }

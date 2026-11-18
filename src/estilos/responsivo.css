@@ -25,6 +25,10 @@
     grid-row: 2;
   }
 
+  .app-sem-explorador .principal {
+    grid-row: 1 / span 2;
+  }
+
   .topo {
     padding: 12px 16px;
   }

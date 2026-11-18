@@ -10,6 +10,10 @@ const NOME_DO_EVENTO_DE_AQUECIMENTO = "agente-aquecimento";
 /** Provedor de agente e se o programa dele está instalado. */
 export const estadoDoAgente = () => invoke<EstadoDoProvedor>("estado_do_agente");
 
+/** Seleciona um provedor para os próximos pedidos. */
+export const definirProvedorDoAgente = (id: string) =>
+  invoke<EstadoDoProvedor>("definir_provedor_do_agente", { id });
+
 /** Situação atual do aquecimento, para a tela ler ao abrir. */
 export const estadoDoAquecimento = () => invoke<AquecimentoDoAgente>("estado_do_aquecimento");
 

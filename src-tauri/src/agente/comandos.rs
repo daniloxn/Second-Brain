@@ -9,7 +9,7 @@ use super::executar::{comando_esta_instalado, executar_provedor};
 use super::foto::tirar_foto;
 use super::historico::{anexar_registro, ler_registros, montar_registro, regravar_registro};
 use super::prompt::{montar_prompt, validar_pedido};
-use super::provedor::provedor_ativo;
+use super::provedor::{id_do_provedor_ativo, provedor_ativo, selecionar_provedor};
 use crate::cofre::caminhos::{raiz_do_cofre_ativo, texto_para_frontend};
 use std::fs;
 use std::path::Path;
@@ -22,10 +22,18 @@ const LIMITE_DAS_REGRAS_EM_CARACTERES: usize = 8000;
 pub fn estado_do_agente() -> EstadoDoProvedor {
     let provedor = provedor_ativo();
     EstadoDoProvedor {
+        id: id_do_provedor_ativo(),
         nome: provedor.nome().to_string(),
         comando: provedor.comando().to_string(),
         instalado: comando_esta_instalado(provedor.comando()),
     }
+}
+
+/// Troca o provedor ativo nesta sessão e devolve o estado atualizado.
+#[tauri::command]
+pub fn definir_provedor_do_agente(id: String) -> Result<EstadoDoProvedor, String> {
+    selecionar_provedor(&id)?;
+    Ok(estado_do_agente())
 }
 
 /// Situação do aquecimento: se o agente já respondeu à saudação feita ao abrir o app.

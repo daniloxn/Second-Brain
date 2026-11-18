@@ -2,13 +2,14 @@
 // Monta o objeto do contrato; não sabe validar regras de negócio, isso é do backend.
 
 import { useState, type FormEvent, type KeyboardEvent } from "react";
-import type { NovaTarefaParaCriar, PrioridadeDaTarefa } from "./contratoTarefas";
+import type { NovaTarefaParaCriar, PrioridadeDaTarefa, RecorrenciaDaTarefa, TarefaDoContrato } from "./contratoTarefas";
 import { rotuloDaPrioridade } from "./formatacaoTarefas";
 
 interface Props {
   /** Tenta criar a tarefa. Lança erro com a mensagem a mostrar. */
   aoEnviar: (entrada: NovaTarefaParaCriar) => Promise<void>;
   aoCancelar: () => void;
+  tarefa?: TarefaDoContrato;
 }
 
 const PRIORIDADES_PARA_ESCOLHER: PrioridadeDaTarefa[] = ["alta", "media", "baixa"];
@@ -21,12 +22,15 @@ function tagsDoTexto(textoDigitado: string): string[] {
     .filter((tag) => tag.length > 0);
 }
 
-export function FormularioNovaTarefa({ aoEnviar, aoCancelar }: Props) {
-  const [titulo, setTitulo] = useState("");
-  const [prioridade, setPrioridade] = useState<PrioridadeDaTarefa>("media");
-  const [dataDoPrazo, setDataDoPrazo] = useState("");
-  const [horaDoPrazo, setHoraDoPrazo] = useState("");
-  const [tagsDigitadas, setTagsDigitadas] = useState("");
+export function FormularioNovaTarefa({ aoEnviar, aoCancelar, tarefa }: Props) {
+  const prazoInicial = tarefa?.recorrencia === "diaria" ? "" : tarefa?.prazo ?? "";
+  const [titulo, setTitulo] = useState(tarefa?.titulo ?? "");
+  const [descricao, setDescricao] = useState(tarefa?.descricao ?? "");
+  const [prioridade, setPrioridade] = useState<PrioridadeDaTarefa>(tarefa?.prioridade ?? "media");
+  const [dataDoPrazo, setDataDoPrazo] = useState(prazoInicial.split(" ")[0]);
+  const [horaDoPrazo, setHoraDoPrazo] = useState(prazoInicial.split(" ")[1] ?? "");
+  const [recorrencia, setRecorrencia] = useState<RecorrenciaDaTarefa>(tarefa?.recorrencia ?? "nenhuma");
+  const [tagsDigitadas, setTagsDigitadas] = useState(tarefa?.tags.join(", ") ?? "");
   const [mensagemDeErro, setMensagemDeErro] = useState<string | null>(null);
   const [estaEnviando, setEstaEnviando] = useState(false);
 
@@ -44,8 +48,10 @@ export function FormularioNovaTarefa({ aoEnviar, aoCancelar }: Props) {
     try {
       await aoEnviar({
         titulo,
+        descricao,
         prioridade,
-        prazo: montarPrazo(),
+        recorrencia,
+        prazo: montarPrazo() ?? "",
         tags: tagsDoTexto(tagsDigitadas),
       });
     } catch (erro) {
@@ -99,7 +105,19 @@ export function FormularioNovaTarefa({ aoEnviar, aoCancelar }: Props) {
             onChange={(evento) => setHoraDoPrazo(evento.target.value)}
           />
         </label>
+        <label className="campo-rotulado">
+          <span>Repetição</span>
+          <select className="campo" value={recorrencia} onChange={(evento) => setRecorrencia(evento.target.value as RecorrenciaDaTarefa)}>
+            <option value="nenhuma">Não repetir</option>
+            <option value="diaria">Todos os dias</option>
+          </select>
+        </label>
       </div>
+
+      <label className="campo-rotulado">
+        <span>Descrição</span>
+        <textarea className="campo" rows={3} value={descricao} onChange={(evento) => setDescricao(evento.target.value)} />
+      </label>
 
       <label className="campo-rotulado">
         <span>Tags (separadas por vírgula)</span>
@@ -108,7 +126,7 @@ export function FormularioNovaTarefa({ aoEnviar, aoCancelar }: Props) {
 
       <div className="linha-acoes">
         <button type="submit" className="botao botao-primario" disabled={estaEnviando}>
-          Criar tarefa
+          {tarefa ? "Salvar alterações" : "Criar tarefa"}
         </button>
         <button type="button" className="botao" onClick={aoCancelar}>
           Cancelar

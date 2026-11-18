@@ -30,16 +30,16 @@ export const SECOES_DO_MENU: SecaoDoMenu[] = [
     id: "segredos",
     titulo: "Segredos",
     icone: KeyRound,
-    faseDeEntrega: "fase 4",
-    descricaoDoAviso: "Senhas guardadas criptografadas, fora dos arquivos de texto.",
+    faseDeEntrega: null,
+    descricaoDoAviso: "",
   },
   { id: "agente", titulo: "Agente", icone: Bot, faseDeEntrega: null, descricaoDoAviso: "" },
   {
     id: "projetos",
     titulo: "Projetos",
     icone: FolderGit2,
-    faseDeEntrega: "fase 7",
-    descricaoDoAviso: "Estado dos projetos de programação, registrado pelos agentes.",
+    faseDeEntrega: null,
+    descricaoDoAviso: "",
   },
 ];
 

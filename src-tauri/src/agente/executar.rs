@@ -21,14 +21,24 @@ pub fn comando_esta_instalado(comando: &str) -> bool {
 /// Roda o provedor uma vez dentro de `pasta_do_cofre` e devolve o texto da resposta.
 /// O prompt segue pela entrada padrão, então não sofre com limite de tamanho nem com aspas da linha de comando.
 pub fn executar_provedor(provedor: &dyn ProvedorAgente, prompt: &str, pasta_do_cofre: &str) -> Result<String, String> {
-    let argumentos = provedor.montar_argumentos(pasta_do_cofre);
+    let mut argumentos = provedor.montar_argumentos(pasta_do_cofre);
+    if provedor.prompt_como_argumento() {
+        argumentos.push(prompt.to_string());
+    }
     let mut processo = Command::new(provedor.comando());
     processo
         .args(&argumentos)
         .current_dir(pasta_do_cofre)
-        .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    if provedor.prompt_como_argumento() {
+        processo.stdin(Stdio::null());
+    } else {
+        processo.stdin(Stdio::piped());
+    }
+    if let Some(configuracao) = provedor.configuracao_de_execucao() {
+        processo.env("OPENCODE_CONFIG_CONTENT", configuracao);
+    }
     sem_janela_de_console(&mut processo);
 
     let mut processo_iniciado = processo

@@ -72,6 +72,44 @@
   min-width: 0;
 }
 
+.acoes-tarefa {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding-left: 8px;
+  opacity: 0.55;
+  transition: opacity var(--dur-rapido);
+}
+
+.item-tarefa:hover .acoes-tarefa,
+.item-tarefa:focus-within .acoes-tarefa {
+  opacity: 1;
+}
+
+.botao-icone-tarefa {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.botao-icone-tarefa:hover {
+  color: var(--color-primary);
+  background: var(--color-card);
+  border-color: var(--color-border);
+}
+
+.botao-apagar-tarefa:hover {
+  color: var(--color-destructive);
+}
+
 .titulo-tarefa {
   font-weight: 500;
   overflow-wrap: anywhere;

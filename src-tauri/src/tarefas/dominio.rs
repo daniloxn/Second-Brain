@@ -3,9 +3,10 @@
 
 use super::frontmatter::{self, citar, descitar, Frontmatter};
 use super::valores::{PrazoTarefa, PrioridadeTarefa, StatusTarefa};
+use chrono::NaiveDate;
 
 /// Chaves do frontmatter que o app interpreta. Qualquer outra chave é guardada e devolvida tal como está.
-const CHAVES_INTERPRETADAS: &[&str] = &["titulo", "status", "prioridade", "prazo", "origem", "tags"];
+const CHAVES_INTERPRETADAS: &[&str] = &["titulo", "status", "prioridade", "prazo", "origem", "tags", "recorrencia", "ultima_conclusao"];
 
 /// Tarefa completa. O `id` é o nome do arquivo `.md` dentro de `tarefas/`.
 #[derive(Debug, Clone, PartialEq)]
@@ -19,6 +20,8 @@ pub struct Tarefa {
     pub prazo: Option<PrazoTarefa>,
     pub origem: String,
     pub tags: Vec<String>,
+    pub recorrencia_diaria: bool,
+    pub ultima_conclusao: Option<NaiveDate>,
     /// Chaves que o app não interpreta. São gravadas de volta sem alteração.
     pub campos_extras: Vec<(String, String)>,
 }
@@ -32,6 +35,7 @@ pub struct NovaTarefa {
     pub prazo: Option<PrazoTarefa>,
     pub origem: String,
     pub tags: Vec<String>,
+    pub recorrencia_diaria: bool,
 }
 
 /// Alterações parciais de uma tarefa. Campo `None` significa "não mudar".
@@ -45,6 +49,7 @@ pub struct AlteracaoDeTarefa {
     pub prazo: Option<Option<PrazoTarefa>>,
     pub origem: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub recorrencia_diaria: Option<bool>,
 }
 
 impl Tarefa {
@@ -85,6 +90,8 @@ impl Tarefa {
             prazo: valor_de("prazo").and_then(PrazoTarefa::do_texto),
             origem: valor_de("origem").map(descitar).unwrap_or_default(),
             tags: valor_de("tags").map(ler_lista_de_tags).unwrap_or_default(),
+            recorrencia_diaria: valor_de("recorrencia").is_some_and(|valor| valor == "diaria"),
+            ultima_conclusao: valor_de("ultima_conclusao").and_then(|valor| NaiveDate::parse_from_str(valor, "%Y-%m-%d").ok()),
             campos_extras,
         }
     }
@@ -112,6 +119,12 @@ impl Tarefa {
         }
         if !self.tags.is_empty() {
             pares.push(("tags".to_string(), escrever_lista_de_tags(&self.tags)));
+        }
+        if self.recorrencia_diaria {
+            pares.push(("recorrencia".to_string(), "diaria".to_string()));
+        }
+        if let Some(data) = self.ultima_conclusao {
+            pares.push(("ultima_conclusao".to_string(), data.format("%Y-%m-%d").to_string()));
         }
         pares.extend(self.campos_extras.iter().cloned());
         pares

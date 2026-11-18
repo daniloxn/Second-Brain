@@ -2,7 +2,7 @@
 // de enviar pedido e desfazer. Guarda a conversa só na memória da tela; o histórico vem do log.
 
 import { useEffect, useRef, useState } from "react";
-import { desfazerAcaoDoAgente, enviarPedidoAoAgente, estadoDoAgente, listarHistoricoDoAgente } from "./chamadasAgente";
+import { aquecerAgente, definirProvedorDoAgente, desfazerAcaoDoAgente, enviarPedidoAoAgente, listarHistoricoDoAgente } from "./chamadasAgente";
 import type { EstadoDoProvedor, FalaParaOAgente, RegistroDoAgente } from "./contratoAgente";
 import { useAquecimentoDoAgente } from "./useAquecimentoDoAgente";
 
@@ -39,11 +39,15 @@ export function useAgente() {
   // Carrega o provedor e o histórico quando a tela abre.
   useEffect(() => {
     let aindaMontada = true;
-    Promise.all([estadoDoAgente(), listarHistoricoDoAgente()])
-      .then(([estado, historicoLido]) => {
+    const provedorAnterior = window.localStorage.getItem("segundo-cerebro-provedor");
+    const provedorSalvo = provedorAnterior === "antigravity" ? "opencode" : provedorAnterior ?? "opencode";
+    definirProvedorDoAgente(provedorSalvo)
+      .then(async (estado) => {
         if (!aindaMontada) return;
+        window.localStorage.setItem("segundo-cerebro-provedor", estado.id);
         setEstadoDoProvedor(estado);
-        setHistorico(historicoLido);
+        setHistorico(await listarHistoricoDoAgente());
+        await aquecerAgente();
       })
       .catch((erro) => {
         if (aindaMontada) setMensagemDeErro(String(erro));
@@ -52,6 +56,19 @@ export function useAgente() {
       aindaMontada = false;
     };
   }, []);
+
+  /** Troca o provedor, guarda a escolha localmente e inicia o aquecimento correspondente. */
+  async function trocarProvedor(id: string) {
+    setMensagemDeErro(null);
+    try {
+      const estado = await definirProvedorDoAgente(id);
+      window.localStorage.setItem("segundo-cerebro-provedor", id);
+      setEstadoDoProvedor(estado);
+      await aquecerAgente();
+    } catch (erro) {
+      setMensagemDeErro(String(erro));
+    }
+  }
 
   /** Relê o histórico do log. Usado depois de cada pedido e de cada desfazer. */
   async function recarregarHistorico() {
@@ -100,6 +117,7 @@ export function useAgente() {
 
   return {
     estadoDoProvedor,
+    trocarProvedor,
     aquecimento,
     tentarDeNovoAquecimento,
     historico,

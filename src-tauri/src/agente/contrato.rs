@@ -52,6 +52,7 @@ pub struct FalaDaConversa {
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct EstadoDoProvedor {
+    pub id: String,
     pub nome: String,
     pub comando: String,
     pub instalado: bool,
