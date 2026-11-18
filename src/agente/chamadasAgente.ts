@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { AquecimentoDoAgente, EstadoDoProvedor, RegistroDoAgente } from "./contratoAgente";
+import type { AquecimentoDoAgente, EstadoDoProvedor, FalaParaOAgente, RegistroDoAgente } from "./contratoAgente";
 
 /** Nome do evento que o backend emite a cada mudança do aquecimento. Mantém igual ao Rust. */
 const NOME_DO_EVENTO_DE_AQUECIMENTO = "agente-aquecimento";
@@ -20,9 +20,9 @@ export const aquecerAgente = () => invoke<void>("aquecer_agente");
 export const ouvirAquecimentoDoAgente = (aoReceber: (aquecimento: AquecimentoDoAgente) => void) =>
   listen<AquecimentoDoAgente>(NOME_DO_EVENTO_DE_AQUECIMENTO, (evento) => aoReceber(evento.payload));
 
-/** Envia um pedido em linguagem natural. Pode levar minutos. */
-export const enviarPedidoAoAgente = (pedido: string) =>
-  invoke<RegistroDoAgente>("enviar_pedido_ao_agente", { pedido });
+/** Envia um pedido em linguagem natural com a conversa anterior. Pode levar minutos. */
+export const enviarPedidoAoAgente = (pedido: string, conversaAnterior: FalaParaOAgente[]) =>
+  invoke<RegistroDoAgente>("enviar_pedido_ao_agente", { pedido, conversaAnterior });
 
 /** Histórico de pedidos, do mais recente para o mais antigo. */
 export const listarHistoricoDoAgente = () => invoke<RegistroDoAgente[]>("listar_historico_do_agente");

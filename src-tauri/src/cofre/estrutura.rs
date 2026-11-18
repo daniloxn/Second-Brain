@@ -51,8 +51,10 @@ pub(crate) fn criar_estrutura_padrao_do_cofre(pasta_raiz: &Path) -> Result<(), S
         fs::create_dir_all(pasta_raiz.join(pasta_relativa)).map_err(|e| e.to_string())?;
     }
 
-    let arquivo_agents = pasta_raiz.join("AGENTS.md");
-    if !arquivo_agents.exists() {
+    // Fica em _sistema/ (ver PLANO.md) porque é de lá que o agente lê as regras.
+    // Cofres antigos com AGENTS.md na raiz continuam valendo: o agente lê dos dois lugares.
+    let arquivo_agents = pasta_raiz.join("_sistema").join("AGENTS.md");
+    if !arquivo_agents.exists() && !pasta_raiz.join("AGENTS.md").exists() {
         fs::write(&arquivo_agents, CONTEUDO_AGENTS_MD).map_err(|e| e.to_string())?;
     }
     Ok(())

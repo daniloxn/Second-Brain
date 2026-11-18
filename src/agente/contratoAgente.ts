@@ -24,6 +24,12 @@ export interface RegistroDoAgente {
   desfeito: boolean;
 }
 
+/** Fala da conversa enviada junto do pedido, para o agente entender "isso" e "sim". Espelha `FalaDaConversa` no Rust. */
+export interface FalaParaOAgente {
+  papel: "voce" | "agente";
+  texto: string;
+}
+
 /** Provedor de agente e se o programa dele está instalado. */
 export interface EstadoDoProvedor {
   nome: string;
