@@ -9,6 +9,17 @@ use std::path::{Path, PathBuf};
 /// Profundidade máxima de pastas ao procurar notas.
 pub(crate) const PROFUNDIDADE_DE_BUSCA_DE_NOTAS: u8 = 12;
 
+/// Arquivos maiores que isso não são lidos ao procurar links, para não travar a busca.
+const TAMANHO_MAXIMO_DE_LEITURA_EM_BYTES: u64 = 2 * 1024 * 1024;
+
+/// Verdadeiro se o arquivo passa do limite de leitura. Se não for possível ler o
+/// tamanho, trata como grande e pula, para não arriscar travar a busca.
+pub(crate) fn arquivo_e_grande_demais(caminho: &Path) -> bool {
+    fs::metadata(caminho)
+        .map(|metadados| metadados.len() > TAMANHO_MAXIMO_DE_LEITURA_EM_BYTES)
+        .unwrap_or(true)
+}
+
 /// Uma nota do cofre: nome sem extensão e caminho completo.
 #[derive(Serialize)]
 pub struct NotaIndice {

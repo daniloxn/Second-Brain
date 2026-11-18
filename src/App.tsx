@@ -21,6 +21,11 @@ const NotaAbertaSobDemanda = lazy(() =>
   import("./notas/NotaAberta").then((modulo) => ({ default: modulo.NotaAberta })),
 );
 
+// A biblioteca 3D (three) é a parte mais pesada do app: carrega só quando o grafo é aberto.
+const TelaDoGrafoSobDemanda = lazy(() =>
+  import("./grafo/TelaDoGrafo").then((modulo) => ({ default: modulo.TelaDoGrafo })),
+);
+
 export default function App() {
   const [idDaSecaoAtiva, setIdDaSecaoAtiva] = useState<IdDaSecao>(SECAO_INICIAL);
   const [caminhoDaNotaAberta, setCaminhoDaNotaAberta] = useState<string | null>(null);
@@ -96,6 +101,12 @@ export default function App() {
   const secaoAtiva = acharSecaoPeloId(idDaSecaoAtiva);
   const estaLendoUmaNota = idDaSecaoAtiva === "notas" && caminhoDaNotaAberta !== null;
   const nomeDoCofre = pastaDoCofre.split(/[\\/]/).filter(Boolean).pop() ?? pastaDoCofre;
+  // Nota aberta e grafo ocupam a área toda, sem margem nem rolagem própria da página.
+  const classeDoConteudo = estaLendoUmaNota
+    ? "conteudo conteudo-nota"
+    : idDaSecaoAtiva === "grafo"
+      ? "conteudo conteudo-grafo"
+      : "conteudo";
 
   /** Tela da área principal, de acordo com a seção escolhida. */
   const conteudoDaSecao = () => {
@@ -132,6 +143,13 @@ export default function App() {
     if (idDaSecaoAtiva === "agente") {
       return <TelaDoAgente />;
     }
+    if (idDaSecaoAtiva === "grafo") {
+      return (
+        <Suspense fallback={<p className="suave">Carregando o grafo…</p>}>
+          <TelaDoGrafoSobDemanda key={versaoDaAtualizacao} aoAbrirNota={abrirNota} />
+        </Suspense>
+      );
+    }
     return <SecaoEmBreve secao={secaoAtiva} />;
   };
 
@@ -158,7 +176,7 @@ export default function App() {
 
         {cofreAberto.mensagemDeErro && <p role="alert" className="erro faixa">{cofreAberto.mensagemDeErro}</p>}
 
-        <section className={estaLendoUmaNota ? "conteudo conteudo-nota" : "conteudo"}>
+        <section className={classeDoConteudo}>
           {conteudoDaSecao()}
         </section>
       </div>
