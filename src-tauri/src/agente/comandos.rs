@@ -2,7 +2,7 @@
 //! prompt, provedor, histórico e desfazer. A lógica de cada peça fica no próprio módulo.
 
 use super::aquecimento::{iniciar_aquecimento, AquecimentoDoAgente, EstadoDoAquecimento};
-use super::contrato::{EstadoDoProvedor, FalaDaConversa, RegistroDoAgente};
+use super::contrato::{EstadoDoProvedor, FalaDaConversa, RegistroDoAgente, TrechoDeResposta, NOME_DO_EVENTO_DE_RESPOSTA_PARCIAL};
 use super::desfazer::desfazer_registro;
 use super::diferencas::comparar_fotos;
 use super::executar::{comando_esta_instalado, executar_provedor};
@@ -13,6 +13,7 @@ use super::provedor::{id_do_provedor_ativo, provedor_ativo, selecionar_provedor}
 use crate::cofre::caminhos::{raiz_do_cofre_ativo, texto_para_frontend};
 use std::fs;
 use std::path::Path;
+use tauri::Emitter;
 
 /// Tamanho máximo das regras do cofre levadas ao prompt. Evita um AGENTS.md enorme estourar o pedido.
 const LIMITE_DAS_REGRAS_EM_CARACTERES: usize = 8000;
@@ -55,10 +56,12 @@ pub async fn enviar_pedido_ao_agente(
     app: tauri::AppHandle,
     pedido: String,
     conversa_anterior: Vec<FalaDaConversa>,
+    id_da_rodada: String,
 ) -> Result<RegistroDoAgente, String> {
     let pedido_validado = validar_pedido(&pedido)?;
-    let resultado =
-        tauri::async_runtime::spawn_blocking(move || executar_pedido(&app, &pedido_validado, &conversa_anterior)).await;
+    let resultado = tauri::async_runtime::spawn_blocking(move || {
+        executar_pedido(&app, &pedido_validado, &conversa_anterior, &id_da_rodada)
+    }).await;
     resultado.map_err(|erro| erro.to_string())?
 }
 
@@ -95,6 +98,7 @@ fn executar_pedido(
     app: &tauri::AppHandle,
     pedido: &str,
     conversa_anterior: &[FalaDaConversa],
+    id_da_rodada: &str,
 ) -> Result<RegistroDoAgente, String> {
     let raiz = raiz_do_cofre_ativo(app)?;
     let pasta_do_cofre = texto_para_frontend(&raiz);
@@ -108,7 +112,13 @@ fn executar_pedido(
         &agora_local(),
         &pasta_do_cofre,
     );
-    let resultado = executar_provedor(provedor.as_ref(), &prompt, &pasta_do_cofre);
+    let id_do_evento = id_da_rodada.to_string();
+    let resultado = executar_provedor(provedor.as_ref(), &prompt, &pasta_do_cofre, |trecho| {
+        let _ = app.emit(
+            NOME_DO_EVENTO_DE_RESPOSTA_PARCIAL,
+            TrechoDeResposta { id_da_rodada: id_do_evento.clone(), texto: trecho.to_string() },
+        );
+    });
 
     let foto_de_depois = tirar_foto(&raiz)?;
     let mudancas = comparar_fotos(&foto_de_antes, &foto_de_depois);

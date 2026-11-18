@@ -2,7 +2,7 @@
 // de enviar pedido e desfazer. Guarda a conversa só na memória da tela; o histórico vem do log.
 
 import { useEffect, useRef, useState } from "react";
-import { aquecerAgente, definirProvedorDoAgente, desfazerAcaoDoAgente, enviarPedidoAoAgente, listarHistoricoDoAgente } from "./chamadasAgente";
+import { aquecerAgente, definirProvedorDoAgente, desfazerAcaoDoAgente, enviarPedidoAoAgente, listarHistoricoDoAgente, ouvirRespostaParcialDoAgente } from "./chamadasAgente";
 import type { EstadoDoProvedor, FalaParaOAgente, RegistroDoAgente } from "./contratoAgente";
 import { useAquecimentoDoAgente } from "./useAquecimentoDoAgente";
 
@@ -20,6 +20,7 @@ export function useAgente() {
   const [historico, setHistorico] = useState<RegistroDoAgente[]>([]);
   const [mensagens, setMensagens] = useState<MensagemDaConversa[]>([]);
   const [enviando, setEnviando] = useState(false);
+  const [respostaParcial, setRespostaParcial] = useState("");
   const [mensagemDeErro, setMensagemDeErro] = useState<string | null>(null);
   const { aquecimento, tentarDeNovo: tentarDeNovoAquecimento } = useAquecimentoDoAgente();
   // Garante que a saudação entre uma vez por visita à tela, mesmo que o efeito rode de novo.
@@ -87,18 +88,28 @@ export function useAgente() {
   /** Envia o pedido, mostra a resposta e atualiza o histórico, mesmo quando o agente falha. */
   async function enviarPedido(pedido: string) {
     setEnviando(true);
+    setRespostaParcial("");
     setMensagemDeErro(null);
     // Conversa até aqui, sem os erros: o agente precisa dela para entender "isso" e "sim".
     const conversaAnterior: FalaParaOAgente[] = mensagens.flatMap((mensagem) =>
       mensagem.papel === "erro" ? [] : [{ papel: mensagem.papel, texto: mensagem.texto }],
     );
     acrescentarMensagem("voce", pedido, null);
+    const idDaRodada = crypto.randomUUID();
+    let pararDeOuvir: (() => void) | null = null;
     try {
-      const registro = await enviarPedidoAoAgente(pedido, conversaAnterior);
+      pararDeOuvir = await ouvirRespostaParcialDoAgente((trecho) => {
+        if (trecho.idDaRodada === idDaRodada) {
+          setRespostaParcial((textoAnterior) => textoAnterior + trecho.texto);
+        }
+      });
+      const registro = await enviarPedidoAoAgente(pedido, conversaAnterior, idDaRodada);
       acrescentarMensagem("agente", registro.resposta, registro);
     } catch (erro) {
       acrescentarMensagem("erro", String(erro), null);
     } finally {
+      pararDeOuvir?.();
+      setRespostaParcial("");
       setEnviando(false);
       await recarregarHistorico();
     }
@@ -123,6 +134,7 @@ export function useAgente() {
     historico,
     mensagens,
     enviando,
+    respostaParcial,
     mensagemDeErro,
     enviarPedido,
     desfazerPedido,

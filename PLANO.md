@@ -72,7 +72,7 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 - Ollama executa `llama3.2` localmente para conversa. Essa integração não concede ferramentas para editar arquivos; modelos ou nomes diferentes ainda não são configuráveis pela tela.
 - Os projetos e seus documentos seguem a sincronização local do OneDrive junto com o cofre. A escolha do provedor fica no armazenamento local do navegador e não é sincronizada.
 - A integração real depende de cada CLI estar instalado, autenticado e funcionando. Não foi executada uma rodada de agente por Codex, Claude Code ou Ollama neste ambiente.
-- OpenCode é o padrão atual. O app executa `opencode run --standalone --format default --agent segundo-cerebro-app <prompt>` com o diretório de trabalho no cofre e passa `OPENCODE_CONFIG_CONTENT` com a definição temporária do agente e suas permissões.
+- OpenCode é o padrão atual. O app executa `opencode run --standalone --format json --agent segundo-cerebro-app <prompt>` com o diretório de trabalho no cofre e passa `OPENCODE_CONFIG_CONTENT` com a definição temporária do agente e suas permissões.
 - Executar apenas o comando no CMD, sem essa variável de ambiente, resulta em `Agent not found: "segundo-cerebro-app"`; isso é esperado porque o agente não é gravado nas configurações globais do OpenCode. No app, a configuração é passada ao processo antes de iniciar.
 - O erro anterior `Unrecognized flag: --dir` foi corrigido removendo a opção; o app já define o diretório atual do processo como a pasta do cofre. A execução real pelo app com o OpenCode instalado ainda está pendente.
 
@@ -101,6 +101,7 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 - **Registro:** antes e depois de cada pedido, o app compara a foto das notas e das pastas do cofre. Cada mudança vai para `_sistema/historico-agente.log` com o texto de antes e de depois. Pedido que falha também é registrado.
 - **Desfazer:** confere que o cofre ainda está como o agente deixou. Se o usuário mexeu depois, para sem alterar nada. Pede confirmação antes de apagar.
 - **Aquecimento:** ao abrir o app, uma saudação roda em segundo plano, numa pasta temporária fora do cofre. A resposta vira a primeira fala da tela do agente.
+- **Resposta progressiva:** o OpenCode roda com `--format json`; cada evento de texto é encaminhado pelo backend como evento Tauri e aparece no chat durante a geração, com cursor animado. Codex, Claude Code e Ollama ainda exibem a resposta ao final da execução.
 - **Checagem de versão nas notas:** se a nota mudou no disco enquanto estava aberta, o salvamento não sobrescreve. A tela oferece usar a versão do disco ou manter a sua. Antes de descartar ou sobrescrever, o texto vai para `_sistema/conflitos/`.
 - **Verificação:** Interface conferida no navegador com backend simulado. `npm.cmd run build` e `cargo check` passam. A saudação do OpenCode ainda precisa ser conferida no app real; validações anteriores do agente eram do provedor anterior.
 
@@ -132,6 +133,7 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 - Testar no app real que o agente propõe e espera o "sim" (a regra está no prompt e os testes só conferem o texto dele).
 - Cada pedido abre um processo novo do OpenCode, então a primeira resposta pode levar de alguns segundos a mais de um minuto. O aquecimento confirma que o agente responde, mas não mantém o modelo carregado.
 - A chamada do OpenCode pelo app ainda precisa de validação ponta a ponta. O comando isolado no CMD sem `OPENCODE_CONFIG_CONTENT` não encontra o agente temporário; o perfil é injetado pelo app em cada processo.
+- Confirmar no app Tauri real que a versão instalada do OpenCode emite eventos de texto JSONL e que a resposta aparece progressivamente antes de a rodada terminar.
 - O serviço do modelo respondeu "sem capacidade" (503) em alguns testes. É indisponibilidade do lado do servidor.
 - Falta testar um pedido real que cria tarefa, do começo ao fim, pelo app.
 - Antes de cada provedor novo, confirmar a permissão de terminal do CLI.

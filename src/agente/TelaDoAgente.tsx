@@ -22,6 +22,7 @@ export function TelaDoAgente({ pedidoInicial, aoConsumirPedidoInicial }: Props) 
     historico,
     mensagens,
     enviando,
+    respostaParcial,
     mensagemDeErro,
     enviarPedido,
     desfazerPedido,
@@ -60,7 +61,7 @@ export function TelaDoAgente({ pedidoInicial, aoConsumirPedidoInicial }: Props) 
           </div>
           {mensagemDeErro && <p role="alert" className="erro faixa">{mensagemDeErro}</p>}
           <div className="area-da-conversa">
-            <ConversaDoAgente mensagens={mensagens} enviando={enviando} />
+            <ConversaDoAgente mensagens={mensagens} enviando={enviando} respostaParcial={respostaParcial} />
           </div>
           <FormularioDoPedido
             desativado={enviando || !provedorPronto}

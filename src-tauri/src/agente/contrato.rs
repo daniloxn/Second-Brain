@@ -3,6 +3,17 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Evento do Tauri com cada parte nova da resposta do provedor.
+pub const NOME_DO_EVENTO_DE_RESPOSTA_PARCIAL: &str = "agente-resposta-parcial";
+
+/// Parte da resposta associada ao pedido que a iniciou.
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct TrechoDeResposta {
+    pub id_da_rodada: String,
+    pub texto: String,
+}
+
 /// Tipo de mudança encontrada no cofre depois de um pedido.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]

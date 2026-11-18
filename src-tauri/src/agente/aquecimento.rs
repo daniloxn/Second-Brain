@@ -109,7 +109,7 @@ fn rodar_aquecimento() -> AquecimentoDoAgente {
         };
     }
     let resultado = pasta_de_aquecimento()
-        .and_then(|pasta| executar_provedor(provedor.as_ref(), PEDIDO_DE_AQUECIMENTO, &pasta));
+        .and_then(|pasta| executar_provedor(provedor.as_ref(), PEDIDO_DE_AQUECIMENTO, &pasta, |_| {}));
     interpretar_resultado(resultado)
 }
 

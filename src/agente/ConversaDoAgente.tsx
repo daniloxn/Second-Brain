@@ -13,9 +13,10 @@ const ROTULO_DA_FALA: Record<MensagemDaConversa["papel"], string> = {
 interface Props {
   mensagens: MensagemDaConversa[];
   enviando: boolean;
+  respostaParcial: string;
 }
 
-export function ConversaDoAgente({ mensagens, enviando }: Props) {
+export function ConversaDoAgente({ mensagens, enviando, respostaParcial }: Props) {
   if (mensagens.length === 0 && !enviando) {
     return (
       <p className="suave">
@@ -34,7 +35,13 @@ export function ConversaDoAgente({ mensagens, enviando }: Props) {
           {mensagem.registro && <span className="suave">{resumoDasMudancas(mensagem.registro.mudancas)}</span>}
         </li>
       ))}
-      {enviando && (
+      {enviando && respostaParcial && (
+        <li className="fala fala-agente fala-em-transmissao">
+          <span className="rotulo-da-fala">Agente</span>
+          <p>{respostaParcial}<span className="cursor-de-transmissao" aria-hidden="true" /></p>
+        </li>
+      )}
+      {enviando && !respostaParcial && (
         <li className="fala fala-agente">
           <span className="rotulo-da-fala">Agente</span>
           <p className="suave">Pensando…</p>

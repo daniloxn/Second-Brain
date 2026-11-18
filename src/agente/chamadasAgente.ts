@@ -24,9 +24,16 @@ export const aquecerAgente = () => invoke<void>("aquecer_agente");
 export const ouvirAquecimentoDoAgente = (aoReceber: (aquecimento: AquecimentoDoAgente) => void) =>
   listen<AquecimentoDoAgente>(NOME_DO_EVENTO_DE_AQUECIMENTO, (evento) => aoReceber(evento.payload));
 
-/** Envia um pedido em linguagem natural com a conversa anterior. Pode levar minutos. */
-export const enviarPedidoAoAgente = (pedido: string, conversaAnterior: FalaParaOAgente[]) =>
-  invoke<RegistroDoAgente>("enviar_pedido_ao_agente", { pedido, conversaAnterior });
+/** Escuta partes novas de uma resposta OpenCode enquanto o pedido ainda está sendo processado. */
+export const ouvirRespostaParcialDoAgente = (aoReceber: (trecho: { idDaRodada: string; texto: string }) => void) =>
+  listen<{ idDaRodada: string; texto: string }>("agente-resposta-parcial", (evento) => aoReceber(evento.payload));
+
+/** Envia o pedido junto ao identificador usado para filtrar eventos de resposta parcial. */
+export const enviarPedidoAoAgente = (
+  pedido: string,
+  conversaAnterior: FalaParaOAgente[],
+  idDaRodada: string,
+) => invoke<RegistroDoAgente>("enviar_pedido_ao_agente", { pedido, conversaAnterior, idDaRodada });
 
 /** Histórico de pedidos, do mais recente para o mais antigo. */
 export const listarHistoricoDoAgente = () => invoke<RegistroDoAgente[]>("listar_historico_do_agente");

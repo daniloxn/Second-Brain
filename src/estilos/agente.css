@@ -61,6 +61,26 @@
   color: var(--texto);
 }
 
+.cursor-de-transmissao {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: piscar-cursor-agente 0.9s steps(2, start) infinite;
+}
+
+@keyframes piscar-cursor-agente {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-de-transmissao {
+    animation: none;
+  }
+}
+
 .area-da-conversa {
   flex: 1;
   min-height: 0;

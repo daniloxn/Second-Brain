@@ -24,12 +24,18 @@ pub trait ProvedorAgente {
     /// Nome do programa no PATH.
     fn comando(&self) -> &'static str;
 
-    /// Argumentos para uma rodada sem interação. `pasta_do_cofre` é liberada para o agente.
-    /// O prompt não vai nos argumentos: ele entra pela entrada padrão do processo.
+    /// Argumentos para uma rodada sem interação. A pasta do cofre também é o diretório de trabalho.
+    /// O prompt entra pela entrada padrão, exceto nos CLIs que exigem argumento posicional.
     fn montar_argumentos(&self, pasta_do_cofre: &str) -> Vec<String>;
 
     /// Alguns CLIs, como OpenCode, recebem o prompt como argumento posicional.
     fn prompt_como_argumento(&self) -> bool { false }
+
+    /// Informa se o CLI publica partes da resposta enquanto o modelo ainda gera texto.
+    fn transmite_resposta(&self) -> bool { false }
+
+    /// Converte uma linha do fluxo de saída em texto novo para a conversa.
+    fn ler_trecho_de_resposta(&self, _linha: &str) -> Result<Option<String>, String> { Ok(None) }
 
     /// Configuração isolada por execução para restringir permissões do CLI, quando necessário.
     fn configuracao_de_execucao(&self) -> Option<&'static str> { None }
