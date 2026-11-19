@@ -1,9 +1,9 @@
 // Hook da tela do agente: estado do provedor, histórico, conversa da sessão e ações
-// de enviar pedido e desfazer. Guarda a conversa só na memória da tela; o histórico vem do log.
+// de enviar pedido, aprovar plano e desfazer. Guarda a conversa só na memória da tela; o histórico vem do log.
 
 import { useEffect, useRef, useState } from "react";
-import { aquecerAgente, definirProvedorDoAgente, desfazerAcaoDoAgente, enviarPedidoAoAgente, listarHistoricoDoAgente, ouvirRespostaParcialDoAgente } from "./chamadasAgente";
-import type { EstadoDoProvedor, FalaParaOAgente, RegistroDoAgente } from "./contratoAgente";
+import { aquecerAgente, definirProvedorDoAgente, desfazerAcaoDoAgente, enviarPedidoAoAgente, listarHistoricoDoAgente, ouvirPassoDoAgente, ouvirRespostaParcialDoAgente } from "./chamadasAgente";
+import type { EstadoDoProvedor, FalaParaOAgente, ModoDeExecucao, RegistroDoAgente } from "./contratoAgente";
 import { useAquecimentoDoAgente } from "./useAquecimentoDoAgente";
 
 /** Uma fala da conversa: o que o usuário pediu, a resposta do agente ou um erro. */
@@ -15,12 +15,17 @@ export interface MensagemDaConversa {
   registro: RegistroDoAgente | null;
 }
 
+/** Texto que o usuário vê quando aprova um plano. O agente recebe o plano completo à parte. */
+const TEXTO_DA_APROVACAO = "Execute o plano aprovado.";
+
 export function useAgente() {
   const [estadoDoProvedor, setEstadoDoProvedor] = useState<EstadoDoProvedor | null>(null);
   const [historico, setHistorico] = useState<RegistroDoAgente[]>([]);
   const [mensagens, setMensagens] = useState<MensagemDaConversa[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [respostaParcial, setRespostaParcial] = useState("");
+  const [passos, setPassos] = useState<string[]>([]);
+  const [modoDoPedido, setModoDoPedido] = useState<ModoDeExecucao>("executar");
   const [mensagemDeErro, setMensagemDeErro] = useState<string | null>(null);
   const { aquecimento, tentarDeNovo: tentarDeNovoAquecimento } = useAquecimentoDoAgente();
   // Garante que a saudação entre uma vez por visita à tela, mesmo que o efeito rode de novo.
@@ -41,7 +46,7 @@ export function useAgente() {
   useEffect(() => {
     let aindaMontada = true;
     const provedorAnterior = window.localStorage.getItem("segundo-cerebro-provedor");
-    const provedorSalvo = provedorAnterior === "antigravity" ? "opencode" : provedorAnterior ?? "opencode";
+    const provedorSalvo = provedorAnterior ?? "opencode";
     definirProvedorDoAgente(provedorSalvo)
       .then(async (estado) => {
         if (!aindaMontada) return;
@@ -85,34 +90,52 @@ export function useAgente() {
     setMensagens((anteriores) => [...anteriores, { id: anteriores.length + 1, papel, texto, registro }]);
   }
 
-  /** Envia o pedido, mostra a resposta e atualiza o histórico, mesmo quando o agente falha. */
-  async function enviarPedido(pedido: string) {
+  /**
+   * Envia o pedido, mostra a resposta e atualiza o histórico, mesmo quando o agente falha.
+   * O modo escolhido decide se a rodada pode editar, só planeja ou consulta a web. `planoAprovado`
+   * vai junto na rodada que executa um plano já aceito.
+   */
+  async function enviarPedido(pedido: string, planoAprovado: string | null = null) {
+    // A rodada que executa um plano aprovado sempre executa, independentemente do modo escolhido.
+    const modo: ModoDeExecucao = planoAprovado === null ? modoDoPedido : "executar";
     setEnviando(true);
     setRespostaParcial("");
+    setPassos([]);
     setMensagemDeErro(null);
     // Conversa até aqui, sem os erros: o agente precisa dela para entender "isso" e "sim".
     const conversaAnterior: FalaParaOAgente[] = mensagens.flatMap((mensagem) =>
       mensagem.papel === "erro" ? [] : [{ papel: mensagem.papel, texto: mensagem.texto }],
     );
-    acrescentarMensagem("voce", pedido, null);
+    acrescentarMensagem("voce", planoAprovado === null ? pedido : TEXTO_DA_APROVACAO, null);
     const idDaRodada = crypto.randomUUID();
-    let pararDeOuvir: (() => void) | null = null;
+    const pararDeOuvir: Array<() => void> = [];
     try {
-      pararDeOuvir = await ouvirRespostaParcialDoAgente((trecho) => {
+      pararDeOuvir.push(await ouvirRespostaParcialDoAgente((trecho) => {
         if (trecho.idDaRodada === idDaRodada) {
           setRespostaParcial((textoAnterior) => textoAnterior + trecho.texto);
         }
-      });
-      const registro = await enviarPedidoAoAgente(pedido, conversaAnterior, idDaRodada);
+      }));
+      pararDeOuvir.push(await ouvirPassoDoAgente((passo) => {
+        if (passo.idDaRodada === idDaRodada) {
+          setPassos((anteriores) => [...anteriores, passo.texto]);
+        }
+      }));
+      const registro = await enviarPedidoAoAgente(pedido, conversaAnterior, idDaRodada, modo, planoAprovado);
       acrescentarMensagem("agente", registro.resposta, registro);
     } catch (erro) {
       acrescentarMensagem("erro", String(erro), null);
     } finally {
-      pararDeOuvir?.();
+      pararDeOuvir.forEach((parar) => parar());
       setRespostaParcial("");
+      setPassos([]);
       setEnviando(false);
       await recarregarHistorico();
     }
+  }
+
+  /** Executa um plano que o usuário aceitou. O texto do plano vai ao agente, não aparece como pedido novo. */
+  async function aprovarPlano(plano: string) {
+    await enviarPedido(TEXTO_DA_APROVACAO, plano);
   }
 
   /** Desfaz um pedido do histórico. Se o cofre mudou depois, o backend recusa e a mensagem explica. */
@@ -135,8 +158,12 @@ export function useAgente() {
     mensagens,
     enviando,
     respostaParcial,
+    passos,
+    modoDoPedido,
+    definirModoDoPedido: setModoDoPedido,
     mensagemDeErro,
     enviarPedido,
+    aprovarPlano,
     desfazerPedido,
   };
 }

@@ -132,6 +132,8 @@ mod testes {
             resposta: "feito".to_string(),
             mudancas,
             desfeito: false,
+            modo: crate::agente::contrato::ModoDeExecucao::Executar,
+            duracao_ms: 0,
         }
     }
 

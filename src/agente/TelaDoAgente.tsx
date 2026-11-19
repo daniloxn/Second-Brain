@@ -1,81 +1,40 @@
-// Tela do agente: conversa com o provedor à esquerda e o histórico das ações à direita.
-// A lógica fica no hook useAgente; aqui só se monta o layout e a linha de situação.
-
-import { ConversaDoAgente } from "./ConversaDoAgente";
-import { FormularioDoPedido } from "./FormularioDoPedido";
+﻿// A conversa vive na ilha. Esta tela mantém o acesso ao histórico do cofre.
+import { useCallback, useEffect, useState } from "react";
+import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { abrirChatNaIlha } from "../ilha/chamadasIlha";
+import { listarHistoricoDoAgente } from "./chamadasAgente";
 import { HistoricoDoAgente } from "./HistoricoDoAgente";
-import { textoDaSituacaoDoAquecimento } from "./formatacaoAgente";
-import { useAgente } from "./useAgente";
+import type { RegistroDoAgente } from "./contratoAgente";
 
-interface Props {
-  pedidoInicial?: string | null;
-  aoConsumirPedidoInicial?: () => void;
-}
+interface Props { pedidoInicial?: string | null; aoConsumirPedidoInicial?: () => void; }
 
-/** Mostra a conversa e permite receber um pedido inicial já preenchido pela importação. */
 export function TelaDoAgente({ pedidoInicial, aoConsumirPedidoInicial }: Props) {
-  const {
-    estadoDoProvedor,
-    trocarProvedor,
-    aquecimento,
-    tentarDeNovoAquecimento,
-    historico,
-    mensagens,
-    enviando,
-    respostaParcial,
-    mensagemDeErro,
-    enviarPedido,
-    desfazerPedido,
-  } = useAgente();
-  const nomeDoProvedor = estadoDoProvedor?.nome ?? "Agente";
-  const provedorPronto = estadoDoProvedor?.instalado === true;
-  const textoDaSituacao = estadoDoProvedor && !estadoDoProvedor.instalado
-    ? `${nomeDoProvedor}: o comando "${estadoDoProvedor.comando}" não foi encontrado no PATH.`
-    : textoDaSituacaoDoAquecimento(aquecimento, nomeDoProvedor);
+  const [historico, setHistorico] = useState<RegistroDoAgente[]>([]);
+  const [erro, setErro] = useState<string | null>(null);
+  const atualizar = useCallback(() => {
+    void listarHistoricoDoAgente().then(setHistorico).catch(e => setErro(String(e)));
+  }, []);
+  useEffect(() => {
+    atualizar();
+    window.addEventListener("focus", atualizar);
+    return () => window.removeEventListener("focus", atualizar);
+  }, [atualizar]);
 
-  return (
-    <div className="area-do-agente">
-      <div className="tela-agente">
-        <section className="coluna-conversa" aria-label="Conversa com o agente">
-          <div className="linha-da-situacao">
-            <div className="seletor-provedor">
-              <label htmlFor="seletor-provedor-agente">Provedor</label>
-              <select
-                id="seletor-provedor-agente"
-                value={estadoDoProvedor?.id ?? "opencode"}
-                disabled={enviando}
-                onChange={(evento) => void trocarProvedor(evento.target.value)}
-              >
-                <option value="opencode">OpenCode</option>
-                <option value="codex">Codex</option>
-                <option value="claude">Claude Code</option>
-                <option value="ollama">Ollama local · somente conversa</option>
-              </select>
-            </div>
-            <p className="suave situacao-do-provedor">{textoDaSituacao}</p>
-            {aquecimento?.situacao === "falhou" && (
-              <button type="button" className="botao" onClick={tentarDeNovoAquecimento}>
-                Tentar de novo
-              </button>
-            )}
-          </div>
-          {mensagemDeErro && <p role="alert" className="erro faixa">{mensagemDeErro}</p>}
-          <div className="area-da-conversa">
-            <ConversaDoAgente mensagens={mensagens} enviando={enviando} respostaParcial={respostaParcial} />
-          </div>
-          <FormularioDoPedido
-            desativado={enviando || !provedorPronto}
-            aoEnviar={enviarPedido}
-            pedidoInicial={pedidoInicial}
-            aoConsumirPedidoInicial={aoConsumirPedidoInicial}
-          />
-        </section>
+  async function abrirConversa() {
+    try { await abrirChatNaIlha(pedidoInicial ?? null); aoConsumirPedidoInicial?.(); setErro(null); }
+    catch (e) { setErro(String(e)); }
+  }
 
-        <aside className="coluna-historico" aria-label="Histórico das ações do agente">
-          <h2 className="rotulo">Ações no cofre</h2>
-          <HistoricoDoAgente registros={historico} bloqueado={enviando} aoDesfazer={desfazerPedido} />
-        </aside>
-      </div>
-    </div>
-  );
+  return <div className="agente-acesso-ilha">
+    <section className="agente-convite-ilha">
+      <MessageCircle size={28} aria-hidden="true" />
+      <h2>Seu chat está no topo da tela</h2>
+      <p>Converse sem sair do que está fazendo. Notas, tarefas e ideias continuam conectadas ao seu cofre.</p>
+      <button className="botao botao-primario" onClick={() => void abrirConversa()}>{pedidoInicial ? "Levar documentos para o chat" : "Abrir conversa"}<ArrowUpRight size={16} /></button>
+      {erro && <p className="erro" role="alert">{erro}</p>}
+    </section>
+    <section aria-label="Histórico do agente"><h2>Ações no cofre</h2><p className="suave">Para desfazer uma ação, abra Opções na ilha.</p>
+      <HistoricoDoAgente registros={historico} bloqueado aoDesfazer={() => {}} />
+    </section>
+  </div>;
 }

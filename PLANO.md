@@ -4,6 +4,8 @@ Aplicativo desktop para Windows (Tauri 2) que funciona como segundo cérebro pes
 
 **Ponto atual (2026-11-18): validação da fase 5 — agente OpenCode no app Tauri.** As fases 4, 6, 7 e 8 estão concluídas em código. Segredos, importação, projetos e os provedores extras ainda precisam de validação no Tauri real.
 
+Registro corrente de estado e correções: `estado/ESTADO_DO_APLICATIVO.md`.
+
 ## 1. Decisões de base
 
 | Tema | Decisão | Motivo |
@@ -63,6 +65,7 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 | 6. Importação | Arrastar e soltar com instrução para o agente | Concluída (código; validar no Tauri real) |
 | 7. Projetos dos agentes | Visão por projeto, `MAPA.md` e `LOG.md` | Concluída (código; validar no Tauri real) |
 | 8. Provedores extras | OpenCode, Codex, Claude e LLM local | Concluída (código; validar cada CLI instalado no Tauri real) |
+| 9. Melhorias do agente e do app | Passos ao vivo, plano em duas rodadas, anexos com destino, aviso ao terminar, modo consultar com web, mais provedores, atalhos globais, tela de configurações, busca nelas e resumo semanal (seção 4g) | Parcial (código; 11, 15, 12, 9router e NVIDIA pendentes) |
 
 ## 4e. Fases 7 e 8: projetos e provedores extras
 
@@ -75,6 +78,55 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 - OpenCode é o padrão atual. O app executa `opencode run --standalone --format json --agent segundo-cerebro-app <prompt>` com o diretório de trabalho no cofre e passa `OPENCODE_CONFIG_CONTENT` com a definição temporária do agente e suas permissões.
 - Executar apenas o comando no CMD, sem essa variável de ambiente, resulta em `Agent not found: "segundo-cerebro-app"`; isso é esperado porque o agente não é gravado nas configurações globais do OpenCode. No app, a configuração é passada ao processo antes de iniciar.
 - O erro anterior `Unrecognized flag: --dir` foi corrigido removendo a opção; o app já define o diretório atual do processo como a pasta do cofre. A execução real pelo app com o OpenCode instalado ainda está pendente.
+
+## 4g. Fase 9: melhorias do agente e do app
+
+Escopo definido em 2026-11-19. Implementado em 2026-11-19, sem teste manual na janela do Tauri (ver "Validação").
+
+**Fora do escopo:** item 6 (iniciar sessão do Claude Code pela ilha) e item 8 (medidor de uso do plano).
+**Já existe:** item 18 (chat pela assinatura da CLI) e item 46 (janela própria com menu lateral).
+**Pendente de decisão:** item 5 (pular para o terminal exato). Adiado. No Windows, o máximo possível é focar a janela do terminal, porque o Windows Terminal não tem API para selecionar uma aba específica.
+
+### 9.1 Passos, aviso, plano e anexos (feito)
+
+- **1. Passos ao vivo.** Medido com chamadas reais. OpenCode 2.3.2 emite `tool_use` com `state.status` `completed`. Claude Code agora roda com `--output-format stream-json --verbose`: mensagens `assistant` trazem `text` e `tool_use`, e o evento `result` traz a resposta final. Os passos aparecem na conversa durante a rodada (`agente-passo`). Codex e Antigravity não publicam passos (não medidos com essa finalidade).
+- **3. Aviso ao terminar.** Notificação do sistema ao fim de cada rodada (`agente/aviso.rs`), só quando a ilha não está em foco. A ilha acende "Resposta pronta" quando a rodada termina com ela recolhida.
+- **13. Plano em duas rodadas.** Seletor de modo na ilha: Executar, Planejar antes, Consultar na web. Em Planejar, a rodada não edita: OpenCode usa o agente `segundo-cerebro-planejar` (sem permissão de edição), Claude usa `--permission-mode plan`, Codex usa sandbox `read-only`. Depois do plano, o botão "Aprovar plano e executar" manda o plano aprovado para a rodada de execução.
+- **7 = 20. Anexos com destino.** Botão Anexar (diálogo nativo, copia para `documentos/` pela importação que já existia) e botão Pasta de destino (só aceita pasta dentro do cofre, fora de `_sistema` e `_segredos`). O texto enviado ao agente leva a lista de anexos marcada como conteúdo não confiável e a pasta de destino.
+
+### 9.2 Aprovações (não feito)
+
+- **11. Permitir, Negar e Sempre pela ilha.** Não implementado. Antes, duas verificações: `claude --settings` aceita hooks (o `--help` mostra `--settings` como JSON ou arquivo, então é provável), e o OpenCode precisa de um modo de "perguntar" nas permissões (não verificado).
+- **15. Nunca travar o agente.** Não implementado, e a regra de 300 ms precisa de decisão: um clique humano não cabe em 300 ms. Hoje a rodada pode ficar esperando o modelo sem limite. Medido: o OpenCode em planejar, num pedido de escrita, chegou a repetir leituras de um arquivo inexistente e não respondeu até o limite do teste. Foi acrescentada uma instrução contra repetição no prompt de planejar, que resolveu esse caso. Um limite de tempo por rodada continua pendente.
+- **12. Múltipla escolha.** Não implementado (depende do 11, que está pendente).
+
+### 9.3 Configurações e produtividade (feito)
+
+- **45. Busca nas configurações.** Seção "Configurações" no menu. A busca filtra as opções pelo título e pelas palavras-chave (sem diferenciar acento nem maiúscula). Opções: provedor do agente e os dois atalhos.
+- **44. Atalhos globais.** `tauri-plugin-global-shortcut`. Ações: abrir o chat (padrão `Ctrl+Alt+Space`) e abrir a janela principal (padrão `Ctrl+Alt+M`). Ficam em `config.json`, em `atalhos`. A troca valida a combinação (precisa de modificador e de uma tecla), recusa combinação repetida entre ações e reverte se o sistema não aceitar. Escolher o cofre não apaga os atalhos (corrigido durante a implementação).
+- **43. Resumo semanal.** Seção "Resumo" no menu, com os últimos sete dias: pedidos ao agente, tempo do agente (só rodadas com medição), linhas alteradas, notas criadas e alteradas pelo agente, tarefas criadas pelo agente e tarefas concluídas. Tarefas agora guardam `concluida_em` no frontmatter (o campo é gravado ao concluir e apagado ao reabrir). Tarefas concluídas antes dessa mudança não têm a data e não contam. O resumo mede o trabalho do agente, não o do usuário.
+
+### 9.4 Chat com outros provedores (parcial)
+
+- **17. Provedores.** Feito: Antigravity (`agy`), pelo modo `--print=` com JSON, verificado com uma chamada real pelo mesmo caminho do app. Já existiam: OpenCode, Codex, Claude Code e Ollama. Não feito: 9router (roteador local na porta 20128; falta confirmar o protocolo e escolher o cliente HTTP) e NVIDIA (precisa de chave, guardada no cofre de segredos, que o agente não lê). Também não feito: separar "chat por API" de "agente com cofre".
+- **19. Busca na web, modo consultar.** Feito só no Claude Code: `WebSearch` e `WebFetch` liberados no modo Consultar, com edição e Bash bloqueados. Os outros provedores recusam o modo com uma mensagem clara, porque não foi verificado como liberar web neles. A web é tratada como dado não confiável no prompt.
+
+### Validação
+
+- `cargo check --all-targets` sem avisos. 154 testes de unidade passam. Dois testes reais, ignorados por padrão (OpenCode e Antigravity), passaram com o CLI instalado.
+- `npm run build` passa.
+- Verificado com chamadas reais aos CLIs: Claude em `plan` (não criou arquivo, gerou plano), OpenCode em `segundo-cerebro-planejar` (não criou arquivo, depois da correção do laço), Claude com `WebSearch` em `plan`, Antigravity em `plan`.
+- Não verificado na janela do Tauri: a tela de configurações, a ilha com o seletor de modo, os anexos e os atalhos globais. O código compila e o build passa, mas a interface precisa de uma conferência manual.
+- Arquivos acima de 200 linhas: `agente/executar.rs` e `tarefas/regras.rs` já passavam disso antes, e `agente/prompt.rs` passou a ter 205. Ficaram para uma revisão.
+
+## 4f. Servidor MCP: o que está pronto
+
+- Binário `segundo-cerebro-mcp` (código em `src-tauri/src/mcp/`), que fala JSON-RPC pela entrada e saída padrão. Ferramentas: `listar_tarefas`, `criar_tarefa`, `buscar_notas` e `ler_nota`. Não lê `_sistema/` nem `_segredos/`, e nenhum caminho sai da pasta do cofre.
+- Cofre: com `--cofre <pasta>` usa essa pasta; sem a opção, lê o `config.json` do app (`%APPDATA%\com.exemplo.tauribasico`), então segue o cofre escolhido na tela. Pasta sem `_sistema/` é recusada.
+- Tarefas e notas usam o mesmo código do app: os repositórios recebem a raiz do cofre, e não mais o `AppHandle`. Um teste confere que o identificador do app bate com o `tauri.conf.json`.
+- Compilar com `cargo build --bin segundo-cerebro-mcp`. Para registrar no Claude Code: `claude mcp add segundo-cerebro -- <caminho>\segundo-cerebro-mcp.exe`. Essa etapa altera a configuração do CLI e não é feita pelo app.
+- Verificação: testes unitários passam; sessão completa pelo stdio contra um cofre temporário; o Claude Code CLI conectou, chamou `buscar_notas` e respondeu com o resultado certo.
+- `criar_tarefa` grava direto no disco. A confirmação antes de criar depende de o agente seguir a descrição da ferramenta e o pedido do prompt; o servidor não pede confirmação por conta própria.
 
 ## 4c. Fase 4 (segredos): o que está pronto
 
@@ -127,7 +179,7 @@ Ordem combinada: 0 → 1 → 2 → 5 → 3 → 4 → 6 → 7 → 8. O agente ent
 - Teclado: o desenho 3D não é navegável por teclado. A busca e a lista de resultados são o caminho acessível para abrir uma nota.
 
 ### Agente (fase 5)
-- O servidor MCP local ainda não existe. Hoje o agente age sobre os arquivos do cofre, e não por ferramentas próprias (`criar_tarefa`, `buscar`, `ler_nota`). O MCP continua previsto e é a forma de ligar os próximos CLIs.
+- O servidor MCP existe e foi testado com o Claude Code CLI, mas o agente do app ainda não o usa: OpenCode, Codex e Claude Code do app continuam agindo sobre os arquivos. Ligar o MCP à tela do agente é o próximo passo.
 - Pedido interrompido pelo fechamento do app não é registrado no histórico, e o processo do agente continua sozinho até terminar ou estourar o tempo limite.
 - A conversa some ao trocar de seção, porque fica só na memória da tela. O histórico em disco permanece. Agora isso também apaga o contexto que o agente recebe; guardar a conversa fora da tela resolve os dois.
 - Testar no app real que o agente propõe e espera o "sim" (a regra está no prompt e os testes só conferem o texto dele).

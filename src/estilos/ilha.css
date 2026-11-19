@@ -1,0 +1,81 @@
+/* A ilha herda Inter e o acento teal do cofre; a superfície preta remete ao notch. */
+.agente-acesso-ilha { max-width: 820px; margin: 0 auto; padding: 24px; }
+.agente-convite-ilha { padding: 30px 0 38px; }
+.agente-convite-ilha > svg { color: var(--color-primary); margin-bottom: 16px; }
+.agente-convite-ilha h2 { font-size: 24px; letter-spacing: -.025em; }
+.agente-convite-ilha p { color: var(--color-muted-foreground); max-width: 55ch; margin: 12px 0 20px; }
+.agente-acesso-ilha > section > h2 { margin-bottom: 12px; }
+html.modo-ilha, .modo-ilha body, .modo-ilha #root { background: transparent; overflow: hidden; }
+.ilha { --ilha-fundo: #101213; --ilha-texto: #edf1f2; --ilha-suave: #a7b1b5; width: 100%; height: 100%; color: var(--ilha-texto); background: var(--ilha-fundo); border-radius: 25px; overflow: hidden; font-size: 13px; }
+.ilha [hidden] { display: none !important; }
+.ilha button, .ilha select, .ilha textarea { font: inherit; }
+.ilha button { cursor: pointer; }
+.ilha button:disabled { cursor: default; }
+.ilha-pilula { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 100%; padding: 0 18px; border: 0; background: transparent; color: var(--ilha-texto); font-size: 12px !important; font-weight: 550 !important; }
+.ilha-pilula > svg:first-child, .ilha-marca { color: var(--color-primary); flex-shrink: 0; }
+.ilha-pilula > svg:last-child { color: var(--ilha-suave); }
+.ilha-pilula:hover { background: #1c2224; }
+.ilha-sinal { display: inline-block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary); }
+.ilha-sinal-ocupado { background: var(--color-accent); animation: ilha-pulso 1.5s ease-in-out infinite; }
+.ilha-expandida { border-radius: 25px; }
+.ilha-painel { display: flex; flex-direction: column; height: 100%; animation: ilha-entrada 220ms cubic-bezier(.16,1,.3,1); }
+.ilha-cabecalho { display: flex; align-items: center; gap: 11px; padding: 21px 18px 17px 22px; flex-shrink: 0; }
+.ilha-titulo { flex: 1; min-width: 0; }
+.ilha-titulo h1 { font-size: 15px; letter-spacing: -.02em; font-weight: 600; }
+.ilha-titulo > span { display: block; font-size: 11px; color: var(--ilha-suave); margin-top: 2px; }
+.ilha-icone { width: 32px; height: 32px; display: grid; place-items: center; flex-shrink: 0; border: 0; border-radius: 9px; color: var(--ilha-suave); background: transparent; }
+.ilha-icone:hover, .ilha-opcoes-botao:hover, .ilha-sair:hover { color: var(--ilha-texto); background: #252a2c; }
+.ilha-chat { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.ilha-contexto { display: flex; justify-content: space-between; align-items: center; padding: 0 22px 12px; border-bottom: 1px solid #282d2f; color: var(--ilha-suave); font-size: 11px; }
+.ilha-contexto > span { display: flex; align-items: center; gap: 7px; }
+.ilha-opcoes-botao { display: flex; align-items: center; gap: 6px; color: var(--ilha-suave); border: 0; border-radius: 6px; padding: 5px 6px; background: transparent; font-size: 11px !important; }
+.ilha-conversa { flex: 1; min-height: 0; overflow: auto; padding: 20px 22px; scrollbar-width: thin; scrollbar-color: #40494d transparent; }
+.ilha-boas-vindas { padding: 38px 0 18px; }
+.ilha-boas-vindas h2 { font-size: 22px; line-height: 1.25; letter-spacing: -.03em; font-weight: 500; max-width: 240px; text-wrap: balance; }
+.ilha-boas-vindas p { color: var(--ilha-suave); line-height: 1.7; margin: 12px 0 0; }
+.ilha .conversa-do-agente { gap: 20px; }
+.ilha .fala { border: 0; padding: 0; background: transparent; line-height: 1.65; }
+.ilha .fala-voce { padding: 11px 14px; border-radius: 14px 14px 4px 14px; background: #242a2d; max-width: 90%; }
+.ilha .rotulo-da-fala { font-size: 10px; color: var(--ilha-suave); margin-bottom: 2px; }
+.ilha .fala-agente .rotulo-da-fala { color: var(--color-primary); }
+.ilha .fala .suave { font-size: 11px; color: var(--ilha-suave); }
+.ilha-compositor { padding: 12px 18px 0; flex-shrink: 0; }
+.ilha .formulario-pedido { padding: 10px 10px 10px 13px; border: 1px solid #394246; border-radius: 15px; background: #1c2123; gap: 8px; }
+.ilha .formulario-pedido:focus-within { border-color: var(--color-primary); }
+.ilha .formulario-pedido textarea.campo { border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--ilha-texto); line-height: 1.6; resize: none; height: 44px; min-height: 44px; max-height: 100px; outline: none; box-shadow: none; }
+.ilha textarea::placeholder { color: var(--ilha-suave); }
+.ilha .formulario-pedido .botao { width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 10px; display: grid; place-items: center; }
+.ilha .formulario-pedido .botao:disabled { background: #354144; color: #a7b1b5; opacity: 1; border-color: transparent; }
+.ilha-dica { display: block; margin-top: 7px; color: var(--ilha-suave); text-align: center; font-size: 10px; }
+.ilha-sinal-nova { background: var(--color-accent); animation: ilha-pulso 1.5s ease-in-out 3; }
+.ilha .planejar-antes { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; color: var(--ilha-suave); font-size: 11px; }
+.ilha .planejar-antes input { margin: 0; accent-color: var(--color-primary); }
+.ilha .passos-do-agente { color: var(--ilha-suave); font-size: 11px; }
+.ilha .passos-do-agente ul { margin: 0; padding-left: 14px; list-style: none; }
+.ilha .passos-do-agente li::before { content: "· "; }
+.ilha .aprovacao-do-plano { margin-top: 8px; }
+.ilha .anexos-do-pedido { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.ilha .anexos-do-pedido-botoes { display: flex; gap: 6px; }
+.ilha .anexo-botao { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid #394246; border-radius: 10px; background: transparent; color: var(--ilha-suave); font-size: 11px; }
+.ilha .anexo-botao:disabled { opacity: 0.5; }
+.ilha .anexos-do-pedido-lista { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ilha .anexo-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border-radius: 10px; background: #1c2123; color: var(--ilha-texto); font-size: 11px; }
+.ilha .anexo-chip button { display: grid; place-items: center; padding: 2px; border: 0; background: transparent; color: var(--ilha-suave); }
+.ilha-rodape { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 23px 13px; color: var(--ilha-suave); font-size: 10px; flex-shrink: 0; }
+.ilha-rodape > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ilha-sair { display: flex; gap: 5px; align-items: center; background: transparent; border: 0; border-radius: 5px; padding: 4px 5px; color: var(--ilha-suave); font-size: 10px !important; }
+.ilha-erro, .ilha-aviso { margin: 8px 20px; padding: 10px; border-radius: 8px; background: #332325; color: #ffb5b5; overflow-wrap: anywhere; max-height: 110px; overflow: auto; font-size: 12px; }
+.ilha-aviso { color: #e6d5b9; background: #302a20; }
+.ilha-aviso button { background: transparent; color: inherit; border: 0; text-decoration: underline; padding: 4px 0; display: block; }
+.ilha-opcoes { flex: 1; min-height: 0; overflow: auto; padding: 18px 22px; }
+.ilha-opcoes label { display: block; margin-bottom: 8px; color: var(--ilha-suave); }
+.ilha-opcoes select { width: 100%; border: 1px solid #394246; border-radius: 8px; padding: 10px; background: #1c2123; color: var(--ilha-texto); }
+.ilha-opcoes h2 { font-size: 14px; margin: 24px 0 12px; }
+.ilha-sem-cofre { flex: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 26px; gap: 14px; }
+.ilha-sem-cofre > svg { color: var(--color-primary); }
+.ilha-sem-cofre h2 { font-size: 23px; }
+.ilha-sem-cofre p { margin: 0; color: var(--ilha-suave); max-width: 31ch; }
+@keyframes ilha-entrada { from { opacity: .65; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ilha-pulso { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .ilha-painel, .ilha-sinal-ocupado { animation: none; } }
+@media (max-width: 360px) { .ilha-titulo > span { display: none; } .ilha-cabecalho { padding-inline: 14px; gap: 8px; } .ilha-conversa { padding-inline: 16px; } }

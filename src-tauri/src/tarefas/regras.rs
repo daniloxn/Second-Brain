@@ -4,7 +4,7 @@
 use super::dominio::{AlteracaoDeTarefa, NovaTarefa, Tarefa};
 use super::valores::{PrazoTarefa, PrioridadeTarefa, StatusTarefa};
 use super::validacao::{validar_tags, validar_titulo};
-use chrono::{Duration, NaiveDateTime};
+use chrono::{Duration, NaiveDate, NaiveDateTime};
 use std::cmp::Ordering;
 
 /// Quantos minutos antes do prazo o aviso dispara.
@@ -64,6 +64,7 @@ pub fn montar_nova_tarefa(id: String, entrada: NovaTarefa) -> Result<Tarefa, Str
         tags: validar_tags(&entrada.tags)?,
         recorrencia_diaria: entrada.recorrencia_diaria,
         ultima_conclusao: None,
+        concluida_em: None,
         // Todo arquivo de tarefa leva `tipo: tarefa`, como no PLANO.md.
         campos_extras: vec![("tipo".to_string(), "tarefa".to_string())],
     })
@@ -101,6 +102,16 @@ pub fn aplicar_alteracao(tarefa: &mut Tarefa, alteracao: AlteracaoDeTarefa) -> R
     Ok(())
 }
 
+/// Guarda o dia da conclusão quando a tarefa fica concluída, e apaga a data quando ela volta a ficar aberta.
+/// A data que já existe não muda: concluir de novo no mesmo dia não empurra o resumo para outra semana.
+pub fn registrar_conclusao(tarefa: &mut Tarefa, hoje: NaiveDate) {
+    if !tarefa.status.esta_concluida() {
+        tarefa.concluida_em = None;
+    } else if tarefa.concluida_em.is_none() {
+        tarefa.concluida_em = Some(hoje);
+    }
+}
+
 #[cfg(test)]
 mod testes {
     use super::*;
@@ -125,6 +136,7 @@ mod testes {
             tags: Vec::new(),
             recorrencia_diaria: false,
             ultima_conclusao: None,
+            concluida_em: None,
             campos_extras: Vec::new(),
         }
     }
@@ -151,6 +163,23 @@ mod testes {
         let tarefa = tarefa_de_teste("a", Some("2026-11-18 14:00"), PrioridadeTarefa::Alta);
         assert!(!deve_avisar(&tarefa, momento(2026, 11, 18, 12, 59), ANTECEDENCIA_DO_AVISO_EM_MINUTOS));
         assert!(deve_avisar(&tarefa, momento(2026, 11, 18, 13, 0), ANTECEDENCIA_DO_AVISO_EM_MINUTOS));
+    }
+
+    #[test]
+    fn conclusao_guarda_o_dia_e_reabrir_apaga() {
+        let dia = NaiveDate::from_ymd_opt(2026, 11, 18).unwrap();
+        let mut tarefa = tarefa_de_teste("relatorio", None, PrioridadeTarefa::Media);
+        tarefa.status = StatusTarefa::Feita;
+        registrar_conclusao(&mut tarefa, dia);
+        assert_eq!(tarefa.concluida_em, Some(dia));
+
+        // Concluir de novo em outro dia mantém a data original.
+        registrar_conclusao(&mut tarefa, NaiveDate::from_ymd_opt(2026, 11, 19).unwrap());
+        assert_eq!(tarefa.concluida_em, Some(dia));
+
+        tarefa.status = StatusTarefa::Aberta;
+        registrar_conclusao(&mut tarefa, dia);
+        assert_eq!(tarefa.concluida_em, None);
     }
 
     #[test]

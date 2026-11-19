@@ -3,15 +3,18 @@
 //! Este arquivo só declara as partes. Cada uma cuida de uma coisa.
 
 pub mod aquecimento;
+mod antigravity;
+mod aviso;
 pub mod comandos;
 mod claude;
 mod codex;
-mod contrato;
+pub(crate) mod contrato;
 mod desfazer;
 mod diferencas;
 mod executar;
 mod foto;
-mod historico;
+pub(crate) mod historico;
+mod passos;
 mod prompt;
 mod provedor;
 mod ollama;

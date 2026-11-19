@@ -18,15 +18,22 @@ import "./estilos/segredos.css";
 import "./estilos/documentos.css";
 import "./estilos/projetos.css";
 import "./estilos/agente.css";
+import "./estilos/configuracoes.css";
+import "./estilos/resumo.css";
 import "./estilos/grafo.css";
 import "./estilos/grafo-painel.css";
 import "./estilos/notas-conflito.css";
 import "./estilos/cofre-inicio.css";
 import "./estilos/responsivo.css";
 import App from "./App";
+import { IlhaDoChat } from "./ilha/IlhaDoChat";
+import "./estilos/ilha.css";
+
+const modoIlha = new URLSearchParams(window.location.search).has("ilha");
+document.documentElement.classList.toggle("modo-ilha", modoIlha);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    {modoIlha ? <IlhaDoChat /> : <App />}
   </React.StrictMode>,
 );

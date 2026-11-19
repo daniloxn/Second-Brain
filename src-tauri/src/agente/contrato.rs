@@ -6,12 +6,26 @@ use serde::{Deserialize, Serialize};
 /// Evento do Tauri com cada parte nova da resposta do provedor.
 pub const NOME_DO_EVENTO_DE_RESPOSTA_PARCIAL: &str = "agente-resposta-parcial";
 
-/// Parte da resposta associada ao pedido que a iniciou.
+/// Evento do Tauri com cada passo do agente (ferramenta usada), para a tela mostrar o que ele faz.
+pub const NOME_DO_EVENTO_DE_PASSO: &str = "agente-passo";
+
+/// Parte da resposta associada ao pedido que a iniciou. Serve para trechos de texto e para passos.
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct TrechoDeResposta {
     pub id_da_rodada: String,
     pub texto: String,
+}
+
+/// Como a rodada roda. `Executar` pode mudar o cofre. `Planejar` só lê e devolve um plano,
+/// que o usuário aprova antes da rodada de execução. `Consultar` lê o cofre e pesquisa na web, sem editar.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ModoDeExecucao {
+    #[default]
+    Executar,
+    Planejar,
+    Consultar,
 }
 
 /// Tipo de mudança encontrada no cofre depois de um pedido.
@@ -48,6 +62,12 @@ pub struct RegistroDoAgente {
     pub resposta: String,
     pub mudancas: Vec<MudancaNoCofre>,
     pub desfeito: bool,
+    /// Registros antigos não têm o campo; contam como execução.
+    #[serde(default)]
+    pub modo: ModoDeExecucao,
+    /// Tempo da rodada do agente, em milissegundos. Zero quando o registro é anterior a esta medição.
+    #[serde(default)]
+    pub duracao_ms: u64,
 }
 
 /// Uma fala da conversa da tela, enviada junto do pedido para o agente entender "isso", "aquilo" e "sim".

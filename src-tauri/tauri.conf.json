@@ -5,7 +5,7 @@
   "identifier": "com.exemplo.tauribasico",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:1430",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
@@ -13,11 +13,29 @@
     "withGlobalTauri": false,
     "windows": [
       {
+        "label": "main",
+        "visible": false,
         "title": "Segundo Cérebro",
         "width": 1200,
         "height": 800,
         "minWidth": 480,
         "minHeight": 480
+      },
+      {
+        "label": "ilha",
+        "title": "Segundo Cérebro · Chat",
+        "url": "index.html?ilha",
+        "width": 248,
+        "height": 48,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "maximizable": false,
+        "focus": false
       }
     ],
     "security": {

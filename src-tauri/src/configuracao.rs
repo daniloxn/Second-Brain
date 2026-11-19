@@ -11,6 +11,28 @@ use tauri::Manager;
 pub struct Configuracao {
     /// Caminho canônico do cofre ativo, sem o prefixo `\\?\` do Windows.
     pub cofre: Option<String>,
+    /// Combinações dos atalhos globais. Config antigo sem o campo recebe os padrões.
+    #[serde(default)]
+    pub atalhos: AtalhosDoApp,
+}
+
+/// Combinação de cada atalho global, no formato do plugin (ex.: `Ctrl+Alt+Space`).
+/// Só guarda o texto; quem valida e registra os atalhos é o módulo `atalhos`.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct AtalhosDoApp {
+    pub abrir_ilha: String,
+    pub abrir_janela_principal: String,
+}
+
+impl Default for AtalhosDoApp {
+    /// Combinações iniciais, usadas quando o config.json ainda não tem atalhos.
+    fn default() -> Self {
+        Self {
+            abrir_ilha: "Ctrl+Alt+Space".into(),
+            abrir_janela_principal: "Ctrl+Alt+M".into(),
+        }
+    }
 }
 
 /// Caminho completo do config.json. Cria a pasta de configuração se ela não existir.

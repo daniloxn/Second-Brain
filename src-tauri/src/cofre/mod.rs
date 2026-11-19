@@ -5,4 +5,4 @@ pub mod comandos;
 pub(crate) mod caminhos;
 mod arvore;
 pub(crate) mod criacao;
-mod estrutura;
+pub(crate) mod estrutura;

@@ -12,6 +12,9 @@ export interface MudancaNoCofre {
   depois: string | null;
 }
 
+/** Como a rodada roda. `executar` pode mudar o cofre; `planejar` só lê e devolve um plano. Espelha `ModoDeExecucao` no Rust. */
+export type ModoDeExecucao = "executar" | "planejar" | "consultar";
+
 /** Um pedido feito ao agente, com a resposta e o que mudou. É uma linha do histórico. */
 export interface RegistroDoAgente {
   id: string;
@@ -22,6 +25,10 @@ export interface RegistroDoAgente {
   resposta: string;
   mudancas: MudancaNoCofre[];
   desfeito: boolean;
+  /** Registros antigos não têm o campo; contam como `executar`. */
+  modo?: ModoDeExecucao;
+  /** Tempo da rodada em milissegundos. Zero ou ausente quando o registro é anterior à medição. */
+  duracaoMs?: number;
 }
 
 /** Fala da conversa enviada junto do pedido, para o agente entender "isso" e "sim". Espelha `FalaDaConversa` no Rust. */

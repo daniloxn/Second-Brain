@@ -6,6 +6,7 @@
 pub mod comandos;
 mod backlinks;
 mod conflito;
+pub(crate) mod consulta;
 pub(crate) mod indice;
 mod nome_da_nota;
 mod versao;

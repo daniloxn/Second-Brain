@@ -2,10 +2,10 @@
 // ou se ainda mostra um aviso de que chega numa fase futura.
 
 import type { LucideIcon } from "lucide-react";
-import { Bot, Brain, CheckSquare, Folder, FolderGit2, FileText, KeyRound } from "lucide-react";
+import { Bot, Brain, CheckSquare, Folder, FolderGit2, FileText, KeyRound, Settings2, BarChart3 } from "lucide-react";
 
 /** Identificador de cada seção. Usado para decidir o que mostrar na área principal. */
-export type IdDaSecao = "arquivos" | "notas" | "tarefas" | "grafo" | "segredos" | "agente" | "projetos";
+export type IdDaSecao = "arquivos" | "notas" | "tarefas" | "grafo" | "segredos" | "agente" | "projetos" | "configuracoes" | "resumo";
 
 export interface SecaoDoMenu {
   id: IdDaSecao;
@@ -41,6 +41,8 @@ export const SECOES_DO_MENU: SecaoDoMenu[] = [
     faseDeEntrega: null,
     descricaoDoAviso: "",
   },
+  { id: "resumo", titulo: "Resumo", icone: BarChart3, faseDeEntrega: null, descricaoDoAviso: "" },
+  { id: "configuracoes", titulo: "Configurações", icone: Settings2, faseDeEntrega: null, descricaoDoAviso: "" },
 ];
 
 /** Busca a seção pelo id. Se não achar, devolve a primeira do menu. */

@@ -1,0 +1,11 @@
+/* Tela de configurações: busca no topo e uma lista de opções, cada uma com seu controle. */
+
+.configuracoes { display: flex; flex-direction: column; gap: 16px; max-width: 640px; }
+.configuracoes .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.configuracoes-busca input { width: 100%; }
+.configuracoes-lista { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.configuracoes-opcao { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--color-borda, #d8dde0); border-radius: 12px; }
+.configuracoes-opcao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.campo-de-atalho { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.atalho-botao { min-width: 180px; padding: 6px 12px; border: 1px solid var(--color-borda, #d8dde0); border-radius: 8px; background: transparent; font: inherit; text-align: left; }
+.atalho-botao:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }

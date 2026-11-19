@@ -1,7 +1,7 @@
 //! Histórico do agente: `_sistema/historico-agente.log`, com um registro JSON por linha.
 //! Só este módulo lê e grava o log. Linhas que não lêem são preservadas ao regravar.
 
-use super::contrato::{MudancaNoCofre, RegistroDoAgente};
+use super::contrato::{ModoDeExecucao, MudancaNoCofre, RegistroDoAgente};
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -20,6 +20,7 @@ pub fn montar_registro(
     nome_do_provedor: &str,
     resultado: &Result<String, String>,
     mudancas: Vec<MudancaNoCofre>,
+    modo: ModoDeExecucao,
 ) -> RegistroDoAgente {
     let resposta = match resultado {
         Ok(texto) => texto.clone(),
@@ -33,6 +34,8 @@ pub fn montar_registro(
         resposta,
         mudancas,
         desfeito: false,
+        modo,
+        duracao_ms: 0,
     }
 }
 
@@ -99,6 +102,7 @@ mod testes {
             "Antigravity",
             resultado,
             Vec::new(),
+            ModoDeExecucao::Executar,
         )
     }
 

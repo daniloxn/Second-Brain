@@ -2,6 +2,7 @@
 //! para confirmar que o provedor responde. O resultado fica guardado, e a tela do agente o lê
 //! quando abre. A rodada roda numa pasta temporária, fora do cofre, e não entra no histórico.
 
+use super::contrato::ModoDeExecucao;
 use super::executar::{comando_esta_instalado, executar_provedor};
 use super::provedor::provedor_ativo;
 use serde::Serialize;
@@ -109,7 +110,8 @@ fn rodar_aquecimento() -> AquecimentoDoAgente {
         };
     }
     let resultado = pasta_de_aquecimento()
-        .and_then(|pasta| executar_provedor(provedor.as_ref(), PEDIDO_DE_AQUECIMENTO, &pasta, |_| {}));
+        // A saudação só responde: roda em modo de planejamento, sem permissão de edição.
+        .and_then(|pasta| executar_provedor(provedor.as_ref(), PEDIDO_DE_AQUECIMENTO, &pasta, ModoDeExecucao::Planejar, |_| {}, |_| {}));
     interpretar_resultado(resultado)
 }
 

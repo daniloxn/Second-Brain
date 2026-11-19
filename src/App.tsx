@@ -12,6 +12,8 @@ import { TelaDeTarefas } from "./tarefas/TelaDeTarefas";
 import { TelaDeSegredos } from "./segredos/TelaDeSegredos";
 import { TelaDeProjetos } from "./projetos/TelaDeProjetos";
 import { TelaDoAgente } from "./agente/TelaDoAgente";
+import { TelaDeConfiguracoes } from "./configuracoes/TelaDeConfiguracoes";
+import { TelaDoResumo } from "./resumo/TelaDoResumo";
 import { importarDocumentos } from "./documentos/chamadasDocumentos";
 import { abrirOuCriarNotaPeloLink, criarNovaNotaNaPastaPadrao } from "./notas/acoesDeNota";
 import { nomeDaNotaNoAlvo } from "./notas/nomesDeNota";
@@ -204,6 +206,12 @@ export default function App() {
           aoConsumirPedidoInicial={() => setPedidoInicialDoAgente(null)}
         />
       );
+    }
+    if (idDaSecaoAtiva === "configuracoes") {
+      return <TelaDeConfiguracoes />;
+    }
+    if (idDaSecaoAtiva === "resumo") {
+      return <TelaDoResumo />;
     }
     if (idDaSecaoAtiva === "grafo") {
       return (

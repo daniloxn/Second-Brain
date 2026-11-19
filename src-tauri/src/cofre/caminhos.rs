@@ -23,7 +23,14 @@ pub(crate) fn raiz_do_cofre_ativo(app: &tauri::AppHandle) -> Result<PathBuf, Str
 /// e junta o nome do arquivo, porque `canonicalize` exige que o caminho exista.
 pub(crate) fn caminho_dentro_do_cofre(app: &tauri::AppHandle, caminho_recebido: &str) -> Result<PathBuf, String> {
     let raiz_do_cofre = raiz_do_cofre_ativo(app)?;
-    let caminho_alvo = PathBuf::from(caminho_recebido);
+    caminho_dentro_da_raiz(&raiz_do_cofre, Path::new(caminho_recebido))
+}
+
+/// Mesma checagem de `caminho_dentro_do_cofre`, para quem já tem a raiz em mãos e não tem
+/// `AppHandle` (o servidor MCP). `raiz_do_cofre` precisa estar canonizada. Um caminho relativo
+/// é juntado à raiz; um caminho absoluto de fora do cofre é recusado pela mesma checagem.
+pub(crate) fn caminho_dentro_da_raiz(raiz_do_cofre: &Path, caminho_alvo: &Path) -> Result<PathBuf, String> {
+    let caminho_alvo = raiz_do_cofre.join(caminho_alvo);
 
     let caminho_canonico = if caminho_alvo.exists() {
         caminho_alvo.canonicalize().map_err(|e| e.to_string())?

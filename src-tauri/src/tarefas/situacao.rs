@@ -77,6 +77,7 @@ mod testes {
             tags: Vec::new(),
             recorrencia_diaria: false,
             ultima_conclusao: None,
+            concluida_em: None,
             campos_extras: Vec::new(),
         }
     }

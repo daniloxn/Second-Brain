@@ -4,12 +4,16 @@
 use tauri::Manager;
 
 mod agente;
+mod atalhos;
 mod cofre;
 mod configuracao;
 mod documentos;
 mod grafo;
+mod ilha;
+pub mod mcp;
 mod notas;
 mod projetos;
+mod resumo;
 mod segredos;
 mod tarefas;
 
@@ -21,7 +25,14 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
+            // Atalhos globais salvos no config.json, para abrir a ilha e a janela de qualquer programa.
+            atalhos::registro::registrar_atalhos_salvos(app.handle());
+            // A ilha é a entrada habitual; sem cofre, mostre também a configuração inicial.
+            if cofre::comandos::cofre_atual(app.handle().clone()).ok().flatten().is_none() {
+                if let Some(janela) = app.get_webview_window("main") { janela.show()?; }
+            }
             app.manage(agente::aquecimento::EstadoDoAquecimento::default());
             app.manage(segredos::comandos::EstadoDoCofreDeSegredos::default());
             // Confere os prazos em segundo plano e avisa pelo sistema.
@@ -30,7 +41,22 @@ pub fn run() {
             agente::aquecimento::iniciar_aquecimento(app.handle());
             Ok(())
         })
+        .on_window_event(|janela, evento| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = evento {
+                api.prevent_close();
+                if janela.label() == "main" {
+                    let _ = janela.hide();
+                } else {
+                    let _ = ilha::dimensionar_ilha(janela.app_handle().clone(), false);
+                    let _ = tauri::Emitter::emit(janela, "ilha-recolher", ());
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
+            ilha::dimensionar_ilha,
+            ilha::abrir_chat_na_ilha,
+            ilha::abrir_janela_principal,
+            ilha::encerrar_aplicativo,
             cofre::comandos::cofre_atual,
             cofre::comandos::abrir_cofre,
             cofre::comandos::criar_cofre,
@@ -63,6 +89,9 @@ pub fn run() {
             agente::comandos::desfazer_acao_do_agente,
             agente::comandos::estado_do_aquecimento,
             agente::comandos::aquecer_agente,
+            atalhos::comandos::atalhos_do_app,
+            atalhos::comandos::definir_atalho,
+            resumo::comandos::resumo_da_semana,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

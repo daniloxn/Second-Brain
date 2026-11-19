@@ -1,53 +1,43 @@
-//! Comandos Tauri da funcionalidade tarefas. Cada comando recebe o contrato,
-//! converte para o domínio, chama as regras e o repositório, e devolve o contrato.
+//! Comandos Tauri da funcionalidade tarefas. Cada comando descobre a pasta do cofre ativo,
+//! converte a entrada, chama as regras e o repositório, e devolve o contrato.
 //! Nenhuma regra de negócio mora aqui.
 
-use super::contrato::{
-    AlteracaoTarefaDto, ListaDeTarefasDto, NovaTarefaDto, TarefaDto, VERSAO_DO_CONTRATO_DE_TAREFAS,
-};
-use super::validacao::slug_do_titulo;
-use super::regras::{aplicar_alteracao, montar_nova_tarefa, ordenar_por_urgencia};
-use super::repositorio::{apagar_tarefa as apagar_arquivo_da_tarefa, gerar_id_livre, gravar_tarefa, gravar_tarefa_nova, ler_tarefa, ler_todas_as_tarefas};
+use super::contrato::{AlteracaoTarefaDto, ListaDeTarefasDto, NovaTarefaDto, TarefaDto};
+use super::regras::aplicar_alteracao;
+use super::repositorio::{apagar_tarefa as apagar_arquivo_da_tarefa, gravar_tarefa, ler_tarefa};
+use super::servico::{criar_tarefa_no_cofre, listar_tarefas_do_cofre};
+use crate::cofre::caminhos::raiz_do_cofre_ativo;
 use chrono::Local;
 
 /// Todas as tarefas do cofre, já ordenadas por urgência e com a situação calculada.
 #[tauri::command]
 pub fn listar_tarefas(app: tauri::AppHandle) -> Result<ListaDeTarefasDto, String> {
-    let agora = Local::now().naive_local();
-    let mut tarefas = ler_todas_as_tarefas(&app)?;
-    ordenar_por_urgencia(&mut tarefas);
-    Ok(ListaDeTarefasDto {
-        versao: VERSAO_DO_CONTRATO_DE_TAREFAS,
-        tarefas: tarefas.iter().map(|tarefa| TarefaDto::de_tarefa(tarefa, agora)).collect(),
-    })
+    listar_tarefas_do_cofre(&raiz_do_cofre_ativo(&app)?, Local::now().naive_local())
 }
 
 /// Cria uma tarefa nova em `tarefas/`, com id derivado do título. Devolve a tarefa criada.
 #[tauri::command]
 pub fn criar_tarefa(app: tauri::AppHandle, entrada: NovaTarefaDto) -> Result<TarefaDto, String> {
-    let agora = Local::now().naive_local();
-    let nova_tarefa = entrada.para_nova_tarefa()?;
-    let id_livre = gerar_id_livre(&app, &slug_do_titulo(&nova_tarefa.titulo))?;
-    let tarefa = montar_nova_tarefa(id_livre, nova_tarefa)?;
-    gravar_tarefa_nova(&app, &tarefa)?;
-    Ok(TarefaDto::de_tarefa(&tarefa, agora))
+    criar_tarefa_no_cofre(&raiz_do_cofre_ativo(&app)?, entrada, Local::now().naive_local())
 }
 
 /// Aplica alterações parciais a uma tarefa existente e devolve a tarefa já atualizada.
 #[tauri::command]
 pub fn atualizar_tarefa(app: tauri::AppHandle, id: String, alteracao: AlteracaoTarefaDto) -> Result<TarefaDto, String> {
     let agora = Local::now().naive_local();
-    let mut tarefa = ler_tarefa(&app, &id)?;
+    let raiz = raiz_do_cofre_ativo(&app)?;
+    let mut tarefa = ler_tarefa(&raiz, &id)?;
     aplicar_alteracao(&mut tarefa, alteracao.para_alteracao()?)?;
     if tarefa.recorrencia_diaria && tarefa.status == super::valores::StatusTarefa::Feita {
         tarefa.ultima_conclusao = Some(agora.date());
     }
-    gravar_tarefa(&app, &tarefa)?;
+    super::regras::registrar_conclusao(&mut tarefa, agora.date());
+    gravar_tarefa(&raiz, &tarefa)?;
     Ok(TarefaDto::de_tarefa(&tarefa, agora))
 }
 
 /// Apaga uma tarefa pelo identificador do arquivo dentro da pasta `tarefas/`.
 #[tauri::command]
 pub fn apagar_tarefa(app: tauri::AppHandle, id: String) -> Result<(), String> {
-    apagar_arquivo_da_tarefa(&app, &id)
+    apagar_arquivo_da_tarefa(&raiz_do_cofre_ativo(&app)?, &id)
 }

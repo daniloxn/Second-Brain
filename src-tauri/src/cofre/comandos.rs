@@ -74,12 +74,11 @@ pub fn listar_arvore(app: tauri::AppHandle, caminho: String) -> Result<NoArvore,
     montar_arvore_padrao(&pasta_alvo)
 }
 
-/// Grava na configuração qual é o cofre ativo.
+/// Grava na configuração qual é o cofre ativo. Lê a configuração antes, para não apagar os outros campos (atalhos).
 fn gravar_cofre_ativo(app: &tauri::AppHandle, caminho_do_cofre: &str) -> Result<(), String> {
-    gravar_configuracao(
-        app,
-        &Configuracao {
-            cofre: Some(caminho_do_cofre.to_string()),
-        },
-    )
+    let mut configuracao: Configuracao = ler_configuracao(app)?;
+    configuracao.cofre = Some(caminho_do_cofre.to_string());
+    gravar_configuracao(app, &configuracao)?;
+    let _ = tauri::Emitter::emit(app, "cofre-alterado", caminho_do_cofre);
+    Ok(())
 }

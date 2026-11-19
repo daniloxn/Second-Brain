@@ -7,6 +7,7 @@ use super::valores::PrazoTarefa;
 use super::situacao::{situacao_da_tarefa, SituacaoTarefa};
 use super::regras::{deve_avisar, ANTECEDENCIA_DO_AVISO_EM_MINUTOS};
 use super::repositorio::ler_todas_as_tarefas;
+use crate::cofre::caminhos::raiz_do_cofre_ativo;
 use chrono::{Local, NaiveDateTime};
 use std::collections::HashSet;
 use std::thread;
@@ -32,7 +33,10 @@ pub fn iniciar_avisos(app: tauri::AppHandle) {
 fn conferir_tarefas_uma_vez(app: &tauri::AppHandle, avisos_ja_enviados: &mut HashSet<String>) {
     let agora = Local::now().naive_local();
     // Sem cofre aberto a leitura falha; nesse caso não há o que avisar.
-    let Ok(tarefas) = ler_todas_as_tarefas(app) else {
+    let Ok(raiz) = raiz_do_cofre_ativo(app) else {
+        return;
+    };
+    let Ok(tarefas) = ler_todas_as_tarefas(&raiz) else {
         return;
     };
 

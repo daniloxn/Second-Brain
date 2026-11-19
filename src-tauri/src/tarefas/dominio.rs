@@ -6,7 +6,7 @@ use super::valores::{PrazoTarefa, PrioridadeTarefa, StatusTarefa};
 use chrono::NaiveDate;
 
 /// Chaves do frontmatter que o app interpreta. Qualquer outra chave é guardada e devolvida tal como está.
-const CHAVES_INTERPRETADAS: &[&str] = &["titulo", "status", "prioridade", "prazo", "origem", "tags", "recorrencia", "ultima_conclusao"];
+const CHAVES_INTERPRETADAS: &[&str] = &["titulo", "status", "prioridade", "prazo", "origem", "tags", "recorrencia", "ultima_conclusao", "concluida_em"];
 
 /// Tarefa completa. O `id` é o nome do arquivo `.md` dentro de `tarefas/`.
 #[derive(Debug, Clone, PartialEq)]
@@ -22,6 +22,8 @@ pub struct Tarefa {
     pub tags: Vec<String>,
     pub recorrencia_diaria: bool,
     pub ultima_conclusao: Option<NaiveDate>,
+    /// Dia em que a tarefa foi concluída. Some quando ela volta a ficar aberta. Tarefas concluídas antes deste campo existir não têm data.
+    pub concluida_em: Option<NaiveDate>,
     /// Chaves que o app não interpreta. São gravadas de volta sem alteração.
     pub campos_extras: Vec<(String, String)>,
 }
@@ -92,6 +94,7 @@ impl Tarefa {
             tags: valor_de("tags").map(ler_lista_de_tags).unwrap_or_default(),
             recorrencia_diaria: valor_de("recorrencia").is_some_and(|valor| valor == "diaria"),
             ultima_conclusao: valor_de("ultima_conclusao").and_then(|valor| NaiveDate::parse_from_str(valor, "%Y-%m-%d").ok()),
+            concluida_em: valor_de("concluida_em").and_then(|valor| NaiveDate::parse_from_str(valor, "%Y-%m-%d").ok()),
             campos_extras,
         }
     }
@@ -125,6 +128,9 @@ impl Tarefa {
         }
         if let Some(data) = self.ultima_conclusao {
             pares.push(("ultima_conclusao".to_string(), data.format("%Y-%m-%d").to_string()));
+        }
+        if let Some(data) = self.concluida_em {
+            pares.push(("concluida_em".to_string(), data.format("%Y-%m-%d").to_string()));
         }
         pares.extend(self.campos_extras.iter().cloned());
         pares

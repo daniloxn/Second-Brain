@@ -1,5 +1,6 @@
 //! Adaptador de conversa local pelo Ollama. Não concede ferramentas para alterar arquivos.
 
+use super::contrato::ModoDeExecucao;
 use super::provedor::ProvedorAgente;
 
 /// Adaptador de modelo local do Ollama.
@@ -11,7 +12,8 @@ impl ProvedorAgente for AdaptadorOllama {
     fn comando(&self) -> &'static str { "ollama" }
 
     /// Executa o modelo local padrão sem habilitar ferramentas de sistema de arquivos.
-    fn montar_argumentos(&self, _pasta_do_cofre: &str) -> Vec<String> {
+    /// Não tem ferramentas, então o modo não muda nada.
+    fn montar_argumentos(&self, _pasta_do_cofre: &str, _modo: ModoDeExecucao) -> Vec<String> {
         vec!["run".into(), "llama3.2".into()]
     }
 
