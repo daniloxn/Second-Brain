@@ -63,10 +63,11 @@
 
 .cursor-de-transmissao {
   display: inline-block;
-  width: 0.55em;
-  height: 1em;
+  width: 0.42em;
+  height: 0.42em;
   margin-left: 3px;
-  vertical-align: text-bottom;
+  border-radius: 50%;
+  vertical-align: middle;
   background: currentColor;
   animation: piscar-cursor-agente 0.9s steps(2, start) infinite;
 }
@@ -117,11 +118,44 @@
   color: var(--color-destructive);
 }
 
-.fala p {
+.fala > p {
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.resposta-do-agente.prosa {
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  overflow-wrap: anywhere;
+}
+
+.resposta-do-agente :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0.8em 0 0.25em;
+  font-size: 1.05em;
+  line-height: 1.35;
+}
+
+.resposta-do-agente :is(h1, h2) { font-size: 1.18em; }
+.resposta-do-agente strong { font-weight: 700; }
+.resposta-do-agente p { white-space: pre-line; }
+.resposta-do-agente blockquote { padding-left: 0.75em; }
+.resposta-do-agente pre { padding: 0.5em 0.75em; }
+
+.tabela-da-resposta {
+  margin: 0.55em 0;
+  overflow-x: auto;
+}
+
+.tabela-da-resposta table { margin: 0; }
+.resposta-do-agente :is(th, td) { padding: 0.3em 0.6em; }
+.resposta-do-agente .task-list-item { list-style: none; }
+.resposta-do-agente input[type="checkbox"] { accent-color: var(--color-primary); }
+.resposta-do-agente > :first-child { margin-top: 0; }
+.resposta-do-agente > :last-child { margin-bottom: 0; }
 
 .rotulo-da-fala {
   font-size: 12px;

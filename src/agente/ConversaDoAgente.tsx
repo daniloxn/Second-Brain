@@ -2,6 +2,9 @@
 // mostra quantas mudanças o agente fez no cofre. Enquanto o agente trabalha, lista os passos
 // (ferramentas usadas). Uma resposta do modo planejar traz o botão para aprovar o plano.
 
+import { memo } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { MensagemDaConversa } from "./useAgente";
 import { resumoDasMudancas } from "./formatacaoAgente";
 
@@ -10,6 +13,30 @@ const ROTULO_DA_FALA: Record<MensagemDaConversa["papel"], string> = {
   agente: "Agente",
   erro: "Erro",
 };
+
+const ELEMENTOS_DA_RESPOSTA: Components = {
+  a({ href, children }) {
+    return href && /^(https?:\/\/|mailto:)/i.test(href)
+      ? <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+      : <>{children}</>;
+  },
+  img({ alt }) {
+    return alt ? <>{alt}</> : null;
+  },
+  table({ node: _node, ...propriedades }) {
+    return <div className="tabela-da-resposta"><table {...propriedades} /></div>;
+  },
+};
+
+const RespostaDoAgente = memo(function RespostaDoAgente({ texto }: { texto: string }) {
+  return (
+    <div className="prosa resposta-do-agente">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={ELEMENTOS_DA_RESPOSTA} skipHtml>
+        {texto}
+      </ReactMarkdown>
+    </div>
+  );
+});
 
 interface Props {
   mensagens: MensagemDaConversa[];
@@ -38,14 +65,14 @@ export function ConversaDoAgente({ mensagens, enviando, respostaParcial, passos,
       {mensagens.map((mensagem) => (
         <li key={mensagem.id} className={`fala fala-${mensagem.papel}`}>
           <span className="rotulo-da-fala">{ROTULO_DA_FALA[mensagem.papel]}</span>
-          <p>{mensagem.texto}</p>
+          {mensagem.papel === "agente" ? <RespostaDoAgente texto={mensagem.texto} /> : <p>{mensagem.texto}</p>}
           {mensagem.registro && <span className="suave">{resumoDasMudancas(mensagem.registro.mudancas)}</span>}
         </li>
       ))}
       {enviando && respostaParcial && (
-        <li className="fala fala-agente fala-em-transmissao">
-          <span className="rotulo-da-fala">Agente</span>
-          <p>{respostaParcial}<span className="cursor-de-transmissao" aria-hidden="true" /></p>
+        <li className="fala fala-agente">
+          <span className="rotulo-da-fala">Agente <span className="cursor-de-transmissao" aria-hidden="true" /></span>
+          <RespostaDoAgente texto={respostaParcial} />
         </li>
       )}
       {enviando && !respostaParcial && (
